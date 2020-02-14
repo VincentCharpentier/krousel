@@ -1,0 +1,38 @@
+{
+  "name": "krousel",
+  "version": "0.0.1",
+  "description": "Carousel library",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prettier": "prettier --write src/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VincentCharpentier/krousel.git"
+  },
+  "keywords": [
+    "carousel",
+    "slider",
+    "javascript"
+  ],
+  "author": "Vincent Charpentier",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/VincentCharpentier/krousel/issues"
+  },
+  "homepage": "https://github.com/VincentCharpentier/krousel#readme",
+  "devDependencies": {
+    "husky": "4.2.3",
+    "lint-staged": "10.0.7",
+    "prettier": "1.19.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": "prettier --write"
+  }
+}
