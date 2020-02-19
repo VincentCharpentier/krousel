@@ -1,0 +1,87 @@
+<html>
+<head>
+    <title>Simple Krousel demo</title>
+    <link rel="stylesheet" type="text/css" href="../../dist/krousel.css"/>
+    <style rel="stylesheet" type="text/css">
+        body {
+            background: #3498db;
+            color: #fff;
+        }
+
+        h3 {
+            background: #fff;
+            color: #3498db;
+            font-size: 36px;
+            line-height: 400px;
+            margin: 10px;
+            padding: 2%;
+            position: relative;
+            text-align: center;
+        }
+
+        section {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        pre {
+            background: #30669c;
+            width: auto;
+            padding: 1em 2em;
+            font-size: 1.3rem;
+            box-shadow: 0 0 6px 4px inset rgba(0, 0, 0, .2);
+        }
+    </style>
+</head>
+<body>
+<script src="../../dist/krousel.js" type="application/javascript"></script>
+<script rel="script" type="application/javascript">
+  function makeKrousel ({ count = 5, name = '', ...config }) {
+    let section = document.createElement('section');
+    let sectionTitle = document.createElement('h1');
+    sectionTitle.innerHTML = name;
+    section.appendChild(sectionTitle);
+    let configDesc = document.createElement('pre');
+    configDesc.innerHTML = JSON.stringify(config, null, 2);
+    section.appendChild(configDesc);
+    let target = document.createElement('div');
+    section.appendChild(target);
+    new Array(count).fill(null).forEach((__, i) => {
+      let slide = document.createElement('div');
+      let title = document.createElement('h3');
+      title.innerHTML = (i + 1).toString();
+      slide.appendChild(title);
+      target.append(slide);
+    });
+    document.body.appendChild(section);
+    new Krousel(target, config);
+  }
+
+  const CONFIGS = [
+    {
+      name: 'Simple demo',
+      count: 5,
+    },
+    {
+      name: 'Show multiple',
+      count: 5,
+      slidesToShow: 2,
+    },
+    {
+      name: 'Scroll multiple',
+      count: 5,
+      slidesToShow: 2,
+      slidesToScroll: 2,
+    },
+    {
+      name: 'Scroll multiple',
+      count: 25,
+      slidesToShow: 4,
+      slidesToScroll: 3,
+    },
+  ];
+
+  CONFIGS.map(makeKrousel);
+</script>
+</body>
+</html>
