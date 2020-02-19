@@ -4,9 +4,12 @@
   "description": "Carousel library",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack -p",
+    "watch": "webpack -d --watch",
+    "start:examples": "http-server -o /examples --no-dotfiles",
     "prettier": "prettier --write src/*"
   },
+  "targets": "> 0.25%, not dead",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/VincentCharpentier/krousel.git"
@@ -23,9 +26,21 @@
   },
   "homepage": "https://github.com/VincentCharpentier/krousel#readme",
   "devDependencies": {
+    "@babel/core": "7.8.4",
+    "@babel/preset-env": "7.8.4",
+    "babel-loader": "8.0.6",
+    "css-loader": "3.4.2",
+    "html-loader": "0.5.5",
+    "html-webpack-plugin": "3.2.0",
+    "http-server": "0.12.1",
     "husky": "4.2.3",
     "lint-staged": "10.0.7",
-    "prettier": "1.19.1"
+    "prettier": "1.19.1",
+    "mini-css-extract-plugin": "0.9.0",
+    "node-sass": "4.13.1",
+    "sass-loader": "8.0.2",
+    "webpack": "4.41.6",
+    "webpack-cli": "3.3.11"
   },
   "husky": {
     "hooks": {
