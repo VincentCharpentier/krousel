@@ -2,6 +2,7 @@ export const DEFAULT_OPTIONS = {
   infinite: true,
   slidesToShow: 1,
   slidesToScroll: 1,
+  speed: 300,
 
   autoplay: false, // TODO
   autoplaySpeed: 3000, // TODO
@@ -10,7 +11,6 @@ export const DEFAULT_OPTIONS = {
   draggable: true, // TODO
   pauseOnFocus: true, // TODO
   pauseOnHover: true, // TODO
-  speed: 300, // TODO
   rtl: false, // TODO
 };
 
@@ -18,7 +18,6 @@ export const CLASSES = {
   root: 'krousel',
   trackContainer: 'k-track-container',
   track: 'k-track',
-  noAnimation: 'k-track-disabled',
   slide: 'k-slide',
   slideClone: 'k-slide-cloned',
   slideVisible: 'k-slide-visible',

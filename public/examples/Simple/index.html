@@ -31,13 +31,36 @@
             font-size: 1.3rem;
             box-shadow: 0 0 6px 4px inset rgba(0, 0, 0, .2);
         }
+
+        .k-arrow-left,
+        .k-arrow-right {
+            background: black;
+            height: 30px;
+            width: 30px;
+        }
+
+        .k-slide {
+            opacity: .2;
+            transition: opacity 300ms ease-in-out;
+        }
+
+        .k-slide-visible {
+            opacity: 1;
+        }
+
+        .slow .k-slide {
+            transition: opacity 1s ease-in-out;
+        }
     </style>
 </head>
 <body>
 <script src="../../dist/krousel.js" type="application/javascript"></script>
 <script rel="script" type="application/javascript">
-  function makeKrousel ({ count = 5, name = '', ...config }) {
+  function makeKrousel ({ count = 5, name = '', className, ...config }) {
     let section = document.createElement('section');
+    if (className) {
+      section.classList.add(className);
+    }
     let sectionTitle = document.createElement('h1');
     sectionTitle.innerHTML = name;
     section.appendChild(sectionTitle);
@@ -67,6 +90,12 @@
       name: 'Infinite loop (default)',
       count: 5,
       infinite: true,
+    },
+    {
+      name: 'Transition speed',
+      count: 5,
+      speed: 1000,
+      className: 'slow',
     },
     {
       name: 'Show multiple',

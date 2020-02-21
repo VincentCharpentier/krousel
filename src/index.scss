@@ -1,10 +1,4 @@
-$arrow-size: 30px;
-$transition-speed: 300ms;
-
-
 .krousel {
-  color: red;
-  background: rgba(#F00, .1);
   white-space: nowrap;
   position: relative;
 }
@@ -15,12 +9,6 @@ $transition-speed: 300ms;
 }
 
 .k-track {
-  transition: transform $transition-speed ease-in-out;
-
-  &.k-track-disabled {
-    transition: none;
-  }
-
   &:before, &:after {
     display: table;
     content: '';
@@ -39,8 +27,6 @@ $transition-speed: 300ms;
 .k-arrow-left,
 .k-arrow-right {
   display: inline-block;
-  height: $arrow-size;
-  width: $arrow-size;
   position: absolute;
   z-index: 1;
   cursor: pointer;
@@ -58,28 +44,4 @@ $transition-speed: 300ms;
 
 .k-arrow-disabled {
   display: none;
-}
-
-// ----------------------------------
-// |                                |
-// |            THEME               |
-// |                                |
-// ----------------------------------
-
-.k-arrow-left,
-.k-arrow-right {
-  background: black;
-}
-
-.k-slide {
-  opacity: .2;
-  transition: opacity $transition-speed ease-in-out;
-}
-
-.k-slide-cloned {
-  //background: lightcoral;
-}
-
-.k-slide-visible {
-  opacity: 1;
 }

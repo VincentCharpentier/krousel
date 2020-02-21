@@ -59,9 +59,6 @@ export default class Slider {
       rtl ? this._prevArrow : this._nextArrow,
     ]);
 
-    // const clonePerSide = infinite
-    //   ? Math.min(2 * slidesToShow, children.length)
-    //   : 0;
     const clonePerSide = infinite ? 2 * slidesToShow : 0;
     this._clonePerSide = clonePerSide;
     const cloneCount = 2 * clonePerSide;
@@ -76,11 +73,14 @@ export default class Slider {
       }),
     });
     htmlUtils.append(trackContainer, this._track);
+    this._enableTransition();
 
     children.forEach((child) => {
       if (child instanceof HTMLElement) {
         child.classList.add(CLASSES.slide);
-        child.style.width = `${this._slideWidth}px`;
+        child.style = htmlUtils.makeStyle({
+          width: `${this._slideWidth}px`,
+        });
         this._track.appendChild(child);
       }
     });
@@ -91,7 +91,6 @@ export default class Slider {
       while (cloneList.length < clonePerSide) {
         cloneList = cloneList.concat(children);
       }
-      // let clonesStart =
       const clonesStart = cloneList.slice(-clonePerSide).map((child) => {
         const clone = child.cloneNode(true);
         clone.classList.add(CLASSES.slideClone);
@@ -160,7 +159,7 @@ export default class Slider {
       requestAnimationFrame(() => this._goToPage(pageIndex));
       return;
     }
-    const { slidesToShow, slidesToScroll } = this._options;
+    const { slidesToShow, slidesToScroll, speed } = this._options;
 
     let postProcess = false,
       finalPageIndex = pageIndex;
@@ -210,16 +209,17 @@ export default class Slider {
         this._goToPage(finalPageIndex);
         requestAnimationFrame(this._enableTransition.bind(this));
       };
-      this.__goToPage_timer = setTimeout(this.__goToPage_defer, 300);
+      this.__goToPage_timer = setTimeout(this.__goToPage_defer, speed);
     }
   }
 
   _enableTransition() {
-    this._track.classList.remove(CLASSES.noAnimation);
+    const { speed } = this._options;
+    this._track.style.transition = `transform ${speed}ms ease-in-out`;
   }
 
   _disableTransition() {
-    this._track.classList.add(CLASSES.noAnimation);
+    this._track.style.transition = 'none';
   }
 
   showNext() {
