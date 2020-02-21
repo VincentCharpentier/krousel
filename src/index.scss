@@ -6,11 +6,12 @@ $transition-speed: 300ms;
   color: red;
   background: rgba(#F00, .1);
   white-space: nowrap;
+  position: relative;
 }
 
 .k-track-container {
   display: inline-block;
-  width: calc(100% - #{2 * $arrow-size});
+  width: 100%;
 }
 
 .k-track {
@@ -40,11 +41,24 @@ $transition-speed: 300ms;
   display: inline-block;
   height: $arrow-size;
   width: $arrow-size;
-  position: relative;
+  position: absolute;
   z-index: 1;
   cursor: pointer;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
+.k-arrow-left {
+  left: 0;
+}
+
+.k-arrow-right {
+  right: 0;
+}
+
+.k-arrow-disabled {
+  display: none;
+}
 
 // ----------------------------------
 // |                                |
@@ -61,9 +75,11 @@ $transition-speed: 300ms;
   opacity: .2;
   transition: opacity $transition-speed ease-in-out;
 }
+
 .k-slide-cloned {
   //background: lightcoral;
 }
+
 .k-slide-visible {
   opacity: 1;
 }

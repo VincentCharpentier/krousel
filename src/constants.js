@@ -1,14 +1,15 @@
 export const DEFAULT_OPTIONS = {
+  infinite: true,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+
   autoplay: false, // TODO
   autoplaySpeed: 3000, // TODO
   arrows: true, // TODO
   dots: false, // TODO
   draggable: true, // TODO
-  infinite: true, // TODO
   pauseOnFocus: true, // TODO
   pauseOnHover: true, // TODO
-  slidesToShow: 1, // TODO
-  slidesToScroll: 1, // TODO
   speed: 300, // TODO
   rtl: false, // TODO
 };
@@ -23,4 +24,5 @@ export const CLASSES = {
   slideVisible: 'k-slide-visible',
   arrowLeft: 'k-arrow-left',
   arrowRight: 'k-arrow-right',
+  arrowDisabled: 'k-arrow-disabled',
 };

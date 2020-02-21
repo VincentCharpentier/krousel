@@ -117,8 +117,7 @@ export default class Slider {
   _cleanUpDOM() {}
 
   _computeSlidesClasses(slideIndex) {
-    const { slidesToShow } = this._options;
-    const slideDOMIndex = slideIndex + this._clonePerSide;
+    const { infinite, slidesToShow } = this._options;
     const highlightIndex = [];
     for (let i = slideIndex; i < slideIndex + slidesToShow; i++) {
       const domIdx = i + this._clonePerSide;
@@ -130,15 +129,27 @@ export default class Slider {
       }
     }
 
-    const slides = this._track
-      .querySelectorAll(`.${CLASSES.slide}`)
-      .forEach((item, i) => {
-        if (highlightIndex.includes(i)) {
-          item.classList.add(CLASSES.slideVisible);
-        } else {
-          item.classList.remove(CLASSES.slideVisible);
-        }
-      });
+    this._track.querySelectorAll(`.${CLASSES.slide}`).forEach((item, i) => {
+      if (highlightIndex.includes(i)) {
+        item.classList.add(CLASSES.slideVisible);
+      } else {
+        item.classList.remove(CLASSES.slideVisible);
+      }
+    });
+
+    // ARROWS
+    if (!infinite) {
+      if (this._currentPage === 0) {
+        this._prevArrow.classList.add(CLASSES.arrowDisabled);
+      } else {
+        this._prevArrow.classList.remove(CLASSES.arrowDisabled);
+      }
+      if (this._currentPage === this._pageCount - 1) {
+        this._nextArrow.classList.add(CLASSES.arrowDisabled);
+      } else {
+        this._nextArrow.classList.remove(CLASSES.arrowDisabled);
+      }
+    }
   }
 
   _goToPage(pageIndex) {
@@ -149,7 +160,7 @@ export default class Slider {
       requestAnimationFrame(() => this._goToPage(pageIndex));
       return;
     }
-    const { infinite, slidesToShow, slidesToScroll } = this._options;
+    const { slidesToShow, slidesToScroll } = this._options;
 
     let postProcess = false,
       finalPageIndex = pageIndex;
@@ -169,31 +180,20 @@ export default class Slider {
     } else {
       slideIndex = pageIndex * slidesToScroll;
     }
-    console.log('GOTO');
-    console.log(`page index ${pageIndex} (${finalPageIndex})`);
-    console.log('=> slide index', slideIndex);
+
     if (
       pageIndex === this._pageCount - 1 &&
       slideIndex > this._slideCount - slidesToShow
     ) {
-      // if (
-      //   slideIndex > this._slideCount - slidesToShow &&
-      //   slideIndex < this._slideCount
-      // ) {
-      console.log('last one');
       // last page might be incomplete if slideCount % slidesToShow != 0
       slideIndex = this._slideCount - slidesToShow;
     }
 
-    let pIdx = slideIndex;
     // Clamp slideIndex to prevent going too far in clones
     slideIndex = Math.min(
       Math.max(slideIndex, -slidesToShow),
       this._slideCount,
     );
-    if (slideIndex !== pIdx) {
-      console.log('got clamped', pIdx, '->', slideIndex);
-    }
 
     // UPDATE CLASSES
     this._computeSlidesClasses(slideIndex);
@@ -223,10 +223,16 @@ export default class Slider {
   }
 
   showNext() {
-    this._goToPage(this._currentPage + 1);
+    const { infinite } = this._options;
+    if (infinite || this._currentPage < this._pageCount - 1) {
+      this._goToPage(this._currentPage + 1);
+    }
   }
 
   showPrev() {
-    this._goToPage(this._currentPage - 1);
+    const { infinite } = this._options;
+    if (infinite || this._currentPage > 0) {
+      this._goToPage(this._currentPage - 1);
+    }
   }
 }
