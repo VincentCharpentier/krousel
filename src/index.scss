@@ -45,3 +45,22 @@
 .k-arrow-disabled {
   display: none;
 }
+
+.k-dots {
+  text-align: center;
+}
+
+.k-dot {
+  $size: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-block;
+  height: $size;
+  margin: $size / 2;
+  opacity: .2;
+  transition: opacity 250ms ease;
+  width: $size;
+  &.k-current {
+    opacity: 1;
+  }
+}

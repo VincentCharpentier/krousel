@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack -p",
     "watch": "webpack -d --watch",
-    "start:examples": "http-server -o /examples --no-dotfiles",
+    "examples": "http-server -o /examples --no-dotfiles",
     "prettier": "prettier --write src/*"
   },
   "targets": "> 0.25%, not dead",

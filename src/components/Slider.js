@@ -14,8 +14,6 @@ function getTarget(targetArg) {
   return result;
 }
 
-const posMod = (a, b) => ((a % b) + b) % b;
-
 export default class Slider {
   constructor(target, options) {
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
@@ -28,7 +26,7 @@ export default class Slider {
    * @private
    */
   _setupDOM() {
-    const { rtl, slidesToShow, slidesToScroll, infinite } = this._options;
+    const { dots, rtl, slidesToShow, slidesToScroll, infinite } = this._options;
 
     const children = Array.from(this._target.children);
 
@@ -53,11 +51,33 @@ export default class Slider {
       className: CLASSES.trackContainer,
     });
 
-    htmlUtils.append(this._target, [
+    let targetChildren = [
       rtl ? this._nextArrow : this._prevArrow,
       trackContainer,
       rtl ? this._prevArrow : this._nextArrow,
-    ]);
+    ];
+
+    if (dots) {
+      // create each dot
+      let dotsItems = new Array(this._pageCount)
+        .fill(null)
+        .map((__) =>
+          htmlUtils.createElement('div', { className: CLASSES.dot }),
+        );
+      dotsItems.forEach((d, i) =>
+        d.addEventListener('click', () => this._goToPage(i)),
+      );
+      this._dots = htmlUtils.createElement(
+        'div',
+        {
+          className: CLASSES.dots,
+        },
+        dotsItems,
+      );
+      targetChildren.push(this._dots);
+    }
+
+    htmlUtils.append(this._target, targetChildren);
 
     const clonePerSide = infinite ? 2 * slidesToShow : 0;
     this._clonePerSide = clonePerSide;
@@ -116,7 +136,7 @@ export default class Slider {
   _cleanUpDOM() {}
 
   _computeSlidesClasses(slideIndex) {
-    const { infinite, slidesToShow } = this._options;
+    const { dots, infinite, slidesToShow } = this._options;
     const highlightIndex = [];
     for (let i = slideIndex; i < slideIndex + slidesToShow; i++) {
       const domIdx = i + this._clonePerSide;
@@ -148,6 +168,13 @@ export default class Slider {
       } else {
         this._nextArrow.classList.remove(CLASSES.arrowDisabled);
       }
+    }
+
+    // DOTS
+    if (dots) {
+      const dotItems = this._dots.querySelectorAll(`.${CLASSES.dot}`);
+      dotItems.forEach((item) => item.classList.remove(CLASSES.current));
+      dotItems[this._currentPage].classList.add(CLASSES.current);
     }
   }
 
