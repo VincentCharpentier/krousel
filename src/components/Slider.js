@@ -88,7 +88,7 @@ export default class Slider {
     this._track = htmlUtils.createElement('div', {
       className: CLASSES.track,
       style: htmlUtils.makeStyle({
-        width: `${(cloneCount + this._slideCount) * this._slideWidth}px`,
+        width: `${(cloneCount + this._slideCount) * this._slideWidth + 1000}px`,
         transform: `translate3d(${-clonePerSide * this._slideWidth}px,0,0)`,
       }),
     });
