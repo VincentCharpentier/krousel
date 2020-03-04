@@ -1,0 +1,27 @@
+/* KROUSEL CUSTOMISATION */
+.k-arrow-left:before {
+  content: '<';
+}
+
+.k-arrow-right:before {
+  content: '>';
+}
+
+.k-arrow-left,
+.k-arrow-right {
+  background: black;
+  padding: .5em;
+}
+
+.k-slide {
+  opacity: .2;
+  transition: opacity 300ms ease-in-out;
+}
+
+.k-slide-visible {
+  opacity: 1;
+}
+
+.k-dot {
+  background: #e6e6e6;
+}

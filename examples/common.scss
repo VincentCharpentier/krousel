@@ -1,0 +1,29 @@
+body {
+  font: 400 16px "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: #3498db;
+  color: #fff;
+}
+
+h3 {
+  background: #fff;
+  color: #3498db;
+  font-size: 36px;
+  line-height: 400px;
+  margin: 10px;
+  padding: 2%;
+  position: relative;
+  text-align: center;
+}
+
+section {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+pre {
+  background: #30669c;
+  width: auto;
+  padding: 1em 2em;
+  font-size: 1.3rem;
+  box-shadow: 0 0 6px 4px inset rgba(0, 0, 0, .2);
+}

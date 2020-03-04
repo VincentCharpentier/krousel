@@ -1,0 +1,39 @@
+$transition-duration: 200ms;
+$transition-delay: 200ms;
+$effect-factor: 1.25;
+
+.lens {
+
+  .k-track-container {
+    position: relative;
+    left: 0;
+    transition: left $transition-duration ease;
+    transition-delay: $transition-delay;
+  }
+
+  .lens-wrapper {
+    width: inherit;
+    transition: transform $transition-duration ease;
+    transition-delay: $transition-delay;
+  }
+
+  .k-slide {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .k-slide-visible {
+    transition: opacity 300ms ease-in-out,
+    margin $transition-duration ease;
+    transition-delay: $transition-delay;
+    will-change: margin-left, margin-right, opacity;
+
+    &:hover .lens-wrapper {
+      transform: scale($effect-factor);
+    }
+  }
+
+  h3 {
+    //opacity: .4;
+  }
+}

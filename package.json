@@ -2,11 +2,13 @@
   "name": "krousel",
   "version": "0.0.1",
   "description": "Carousel library",
-  "main": "index.js",
+  "source": "src/index.js",
+  "main": "dist/krousel.js",
+  "module": "dist/krousel.module.js",
   "scripts": {
-    "build": "webpack -p",
-    "watch": "webpack -d --watch",
-    "examples": "http-server -o /examples --no-dotfiles",
+    "build": "microbundle --name Krousel",
+    "watch": "microbundle watch --name Krousel",
+    "examples": "parcel ./examples/index.html -d public --open & http-server dist -p 8082",
     "prettier": "prettier --write src/*"
   },
   "targets": "> 0.25%, not dead",
@@ -35,9 +37,10 @@
     "http-server": "0.12.1",
     "husky": "4.2.3",
     "lint-staged": "10.0.7",
-    "prettier": "1.19.1",
+    "microbundle": "0.11.0",
     "mini-css-extract-plugin": "0.9.0",
     "node-sass": "4.13.1",
+    "prettier": "1.19.1",
     "sass-loader": "8.0.2",
     "webpack": "4.41.6",
     "webpack-cli": "3.3.11"
@@ -48,6 +51,6 @@
     }
   },
   "lint-staged": {
-    "*.js": "prettier --write"
+    "src/**/*.js": "prettier --write"
   }
 }
