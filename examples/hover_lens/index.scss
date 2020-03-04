@@ -1,20 +1,30 @@
-$transition-duration: 200ms;
-$transition-delay: 200ms;
+$transition-duration: 500ms;
+$transition-delay: 250ms;
+$transition-fn: ease-in-out;
 $effect-factor: 1.25;
 
 .lens {
-
   .k-track-container {
     position: relative;
-    left: 0;
-    transition: left $transition-duration ease;
-    transition-delay: $transition-delay;
+    margin-left: 0;
+    transition: margin-left $transition-duration $transition-fn $transition-delay;
+
+    $factor: ($effect-factor - 1);
+    &.stepBack {
+      margin-left: calc(var(--slide-width) * #{-$factor / 2});
+      &.firstFocused {
+        margin-left: 0;
+      }
+      &.lastFocused {
+        margin-left: calc(var(--slide-width) * #{-$factor});
+      }
+    }
   }
 
   .lens-wrapper {
-    width: inherit;
-    transition: transform $transition-duration ease;
-    transition-delay: $transition-delay;
+    transition: transform $transition-duration $transition-fn $transition-delay;
+    width: var(--slide-width);
+    margin: 0 auto;
   }
 
   .k-slide {
@@ -24,16 +34,15 @@ $effect-factor: 1.25;
 
   .k-slide-visible {
     transition: opacity 300ms ease-in-out,
-    margin $transition-duration ease;
-    transition-delay: $transition-delay;
-    will-change: margin-left, margin-right, opacity;
+    width $transition-duration $transition-fn $transition-delay;
+    margin: 0;
 
-    &:hover .lens-wrapper {
-      transform: scale($effect-factor);
+    &:hover {
+      width: calc(var(--slide-width) * #{$effect-factor});
+
+      .lens-wrapper {
+        transform: scale($effect-factor);
+      }
     }
-  }
-
-  h3 {
-    //opacity: .4;
   }
 }

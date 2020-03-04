@@ -24,13 +24,6 @@ function makeKrousel({ count = 5, name = '', className, ...config }) {
 
 const CONFIGS = [
   {
-    name: 'hover lens effect',
-    className: 'lens',
-    infinite: true,
-    count: 10,
-    slidesToShow: 3,
-  },
-  {
     name: 'Simple demo',
     count: 5,
     infinite: false,
@@ -67,6 +60,14 @@ const CONFIGS = [
     name: 'Hide dots',
     count: 5,
     dots: false,
+  },
+  {
+    name: 'hover lens effect',
+    className: 'lens',
+    infinite: true,
+    zoomHover: true,
+    count: 10,
+    slidesToShow: 3,
   },
 ];
 
