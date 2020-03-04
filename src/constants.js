@@ -30,3 +30,8 @@ export const CLASSES = {
   dot: 'k-dot',
   current: 'k-current',
 };
+
+export const CSS_VARS = {
+  slideWidth: '--slide-width',
+  slideDOMIndex: '--slide-didx',
+};

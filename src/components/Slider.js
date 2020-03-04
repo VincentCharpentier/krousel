@@ -1,6 +1,8 @@
-import { DEFAULT_OPTIONS, CLASSES } from '../constants';
+import { DEFAULT_OPTIONS, CSS_VARS, CLASSES } from '../constants';
 import KrouselError, { INVALID_TARGET } from '../errors';
 import { htmlUtils } from '../utils';
+
+import './Slider.scss';
 
 function getTarget(targetArg) {
   let result = targetArg;
@@ -19,6 +21,10 @@ export default class Slider {
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
     this._target = getTarget(target);
     this._setupDOM();
+  }
+
+  _setCssVar(name, value) {
+    this._target.style.setProperty(name, value);
   }
 
   /**
@@ -83,13 +89,14 @@ export default class Slider {
     this._clonePerSide = clonePerSide;
     const cloneCount = 2 * clonePerSide;
     const sliderWidth = trackContainer.clientWidth;
-    this._slideWidth = sliderWidth / slidesToShow;
+    const slideWidth = sliderWidth / slidesToShow;
+    this._setCssVar(CSS_VARS.slideWidth, slideWidth + 'px');
+    this._setCssVar(CSS_VARS.slideDOMIndex, clonePerSide);
 
     this._track = htmlUtils.createElement('div', {
       className: CLASSES.track,
       style: htmlUtils.makeStyle({
-        width: `${(cloneCount + this._slideCount) * this._slideWidth + 1000}px`,
-        transform: `translate3d(${-clonePerSide * this._slideWidth}px,0,0)`,
+        width: `${(cloneCount + this._slideCount) * slideWidth + 1000}px`,
       }),
     });
     htmlUtils.append(trackContainer, this._track);
@@ -98,9 +105,6 @@ export default class Slider {
     children.forEach((child) => {
       if (child instanceof HTMLElement) {
         child.classList.add(CLASSES.slide);
-        child.style = htmlUtils.makeStyle({
-          width: `${this._slideWidth}px`,
-        });
         this._track.appendChild(child);
       }
     });
@@ -133,7 +137,9 @@ export default class Slider {
    * Revert changes made to the DOM upon destroy
    * @private
    */
-  _cleanUpDOM() {}
+  _cleanUpDOM() {
+    // TODO
+  }
 
   _computeSlidesClasses(slideIndex) {
     const { dots, infinite, slidesToShow } = this._options;
@@ -225,8 +231,7 @@ export default class Slider {
     this._computeSlidesClasses(slideIndex);
 
     const slideDOMIndex = slideIndex + this._clonePerSide;
-    const dX = slideDOMIndex * this._slideWidth;
-    this._track.style.transform = `translate3d(${-dX}px, 0, 0)`;
+    this._setCssVar(CSS_VARS.slideDOMIndex, slideDOMIndex);
     if (postProcess) {
       this.__goToPage_defer = () => {
         delete this.__goToPage_defer;

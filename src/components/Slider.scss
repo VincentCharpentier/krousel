@@ -1,6 +1,8 @@
 .krousel {
   white-space: nowrap;
   position: relative;
+  --slide-width: 0;
+  --slide-didx: 0;
 }
 
 .k-track-container {
@@ -9,6 +11,9 @@
 }
 
 .k-track {
+  --dX: calc(-1 * var(--slide-width) * var(--slide-didx));
+  transform: translate3d(var(--dX), 0, 0);
+
   &:before, &:after {
     display: table;
     content: '';
@@ -22,6 +27,7 @@
 
 .k-slide {
   float: left;
+  width: var(--slide-width);
 }
 
 .k-arrow-left,

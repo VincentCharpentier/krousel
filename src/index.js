@@ -1,5 +1,3 @@
-import './index.scss';
-
 export { default } from './components/Slider';
 
 // export { default as Error } from './errors';
