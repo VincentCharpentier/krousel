@@ -2,7 +2,7 @@ import './index.scss';
 
 function makeLensSection(section) {
   if (section) {
-    const trackContainer = document.querySelector('.k-track-container');
+    const trackContainer = section.querySelector('.k-track-container');
 
     function onMouseEnter(e) {
       const element = e.currentTarget;
@@ -24,14 +24,14 @@ function makeLensSection(section) {
         parentClasses.push('lastFocused');
       }
 
-      trackContainer.classList.add(...parentClasses);
+      parentClasses.forEach((c) => trackContainer.classList.add(c));
     }
 
     function onMouseOut(e) {
       const element = e.currentTarget;
       if (!element.contains(e.relatedTarget)) {
-        trackContainer.classList.remove(
-          ...['stepBack', 'firstFocused', 'lastFocused'],
+        ['stepBack', 'firstFocused', 'lastFocused'].forEach((c) =>
+          trackContainer.classList.remove(c),
         );
       }
     }
