@@ -1,6 +1,6 @@
 import { DEFAULT_OPTIONS, CSS_VARS, CLASSES } from '../constants';
 import KrouselError, { INVALID_TARGET } from '../errors';
-import { htmlUtils, validators } from '../utils';
+import { htmlUtils, validators, debounce } from '../utils';
 
 import './Slider.scss';
 
@@ -45,6 +45,12 @@ export default class Slider {
   constructor(target, options) {
     this._options = mergeOptions(options);
     this._target = getTarget(target);
+
+    this.showPrev = this.showPrev.bind(this);
+    this.showNext = this.showNext.bind(this);
+    this._enableTransition = this._enableTransition.bind(this);
+    this._handleResize = this._handleResize.bind(this);
+
     this._setupDOM();
   }
 
@@ -80,18 +86,18 @@ export default class Slider {
     this._prevArrow = htmlUtils.createElement('div', {
       className: CLASSES.arrowLeft,
     });
-    this._prevArrow.addEventListener('click', this.showPrev.bind(this));
+    this._prevArrow.addEventListener('click', this.showPrev);
     this._nextArrow = htmlUtils.createElement('div', {
       className: CLASSES.arrowRight,
     });
-    this._nextArrow.addEventListener('click', this.showNext.bind(this));
-    const trackContainer = htmlUtils.createElement('div', {
+    this._nextArrow.addEventListener('click', this.showNext);
+    this._trackContainer = htmlUtils.createElement('div', {
       className: CLASSES.trackContainer,
     });
 
     htmlUtils.append(this._target, [
       rtl ? this._nextArrow : this._prevArrow,
-      trackContainer,
+      this._trackContainer,
       rtl ? this._prevArrow : this._nextArrow,
     ]);
 
@@ -117,22 +123,14 @@ export default class Slider {
       container.appendChild(this._dots);
     }
 
-    const clonePerSide = infinite ? 2 * slidesToShow : 0;
-    this._clonePerSide = clonePerSide;
-    const cloneCount = 2 * clonePerSide;
-    const sliderWidth = trackContainer.clientWidth;
-    const slideWidth = sliderWidth / slidesToShow;
-    this._setCssVar(CSS_VARS.slideWidth, slideWidth + 'px');
-    this._setCssVar(CSS_VARS.slideDOMIndex, clonePerSide);
+    this._clonePerSide = infinite ? 2 * slidesToShow : 0;
+    this._setCssVar(CSS_VARS.slideDOMIndex, this._clonePerSide);
 
     this._track = htmlUtils.createElement('div', {
       className: CLASSES.track,
-      style: htmlUtils.makeStyle({
-        width: `${(cloneCount + this._slideCount) * slideWidth + 1000}px`,
-      }),
     });
-    htmlUtils.append(trackContainer, this._track);
-    this._enableTransition();
+    htmlUtils.append(this._trackContainer, this._track);
+    this._computeSize();
 
     children.forEach((child) => {
       if (child instanceof HTMLElement) {
@@ -144,15 +142,15 @@ export default class Slider {
     if (infinite) {
       const firstSlide = this._track.firstChild;
       let cloneList = children;
-      while (cloneList.length < clonePerSide) {
+      while (cloneList.length < this._clonePerSide) {
         cloneList = cloneList.concat(children);
       }
-      const clonesStart = cloneList.slice(-clonePerSide).map((child) => {
+      const clonesStart = cloneList.slice(-this._clonePerSide).map((child) => {
         const clone = child.cloneNode(true);
         clone.classList.add(CLASSES.slideClone);
         return clone;
       });
-      cloneList.slice(0, clonePerSide).forEach((child) => {
+      cloneList.slice(0, this._clonePerSide).forEach((child) => {
         const clone = child.cloneNode(true);
         clone.classList.add(CLASSES.slideClone);
         this._track.appendChild(clone);
@@ -163,6 +161,19 @@ export default class Slider {
     }
 
     this._computeSlidesClasses(0);
+
+    // defer activation of transitions to next repaint
+    requestAnimationFrame(this._enableTransition);
+
+    // setup listeners
+    window.addEventListener('resize', debounce(this._handleResize, 50));
+  }
+
+  _handleResize() {
+    this._disableTransition();
+    this._computeSize();
+    // defer activation of transitions to next repaint
+    requestAnimationFrame(this._enableTransition);
   }
 
   /**
@@ -276,7 +287,7 @@ export default class Slider {
         // teleport back to index within bounds (after sliding in clones)
         this._disableTransition();
         this._goToPage(finalPageIndex);
-        requestAnimationFrame(this._enableTransition.bind(this));
+        requestAnimationFrame(this._enableTransition);
       };
       this.__goToPage_timer = setTimeout(this.__goToPage_defer, speed);
     }
@@ -289,6 +300,16 @@ export default class Slider {
 
   _disableTransition() {
     this._track.style.transition = 'none';
+  }
+
+  _computeSize() {
+    const { slidesToShow } = this._options;
+    const cloneCount = 2 * this._clonePerSide;
+    const sliderWidth = this._trackContainer.clientWidth;
+    const slideWidth = sliderWidth / slidesToShow;
+    this._setCssVar(CSS_VARS.slideWidth, slideWidth + 'px');
+    this._track.style.width = `${(cloneCount + this._slideCount) * slideWidth +
+      1000}px`;
   }
 
   showNext() {
