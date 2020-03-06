@@ -7,12 +7,16 @@ function makeKrousel({ count = 5, name = '', className, ...config }) {
   sectionTitle.innerHTML = name;
   section.appendChild(sectionTitle);
   let configDesc = document.createElement('pre');
-  configDesc.innerHTML = JSON.stringify(config, (key,value)=>{
-    if (value instanceof HTMLElement) {
-      return value.constructor.name;
-    }
-    return value;
-  }, 2);
+  configDesc.innerHTML = JSON.stringify(
+    config,
+    (key, value) => {
+      if (value instanceof HTMLElement) {
+        return value.constructor.name;
+      }
+      return value;
+    },
+    2,
+  );
   section.appendChild(configDesc);
   let target = document.createElement('div');
   section.appendChild(target);
@@ -67,6 +71,29 @@ const CONFIGS = [
     dots: false,
   },
   {
+    name: 'Responsive',
+    count: 10,
+    slidesToShow: 3,
+    slidesToScroll: 3,
+    responsive: [
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 2,
+        },
+      },
+      {
+        breakpoint: 400,
+        settings: {
+          infinite: false,
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        },
+      },
+    ],
+  },
+  {
     name: 'hover lens effect',
     className: 'lens',
     infinite: true,
@@ -76,6 +103,6 @@ const CONFIGS = [
   },
 ];
 
-// window.addEventListener('load', function() {
+window.addEventListener('load', function() {
   CONFIGS.map(makeKrousel);
-// });
+});

@@ -1,6 +1,6 @@
 import { DEFAULT_OPTIONS, CSS_VARS, CLASSES } from '../constants';
 import KrouselError, { INVALID_TARGET } from '../errors';
-import { htmlUtils, validators, debounce } from '../utils';
+import { htmlUtils, validators, debounce, pick, objectDiff } from '../utils';
 
 import './Slider.scss';
 
@@ -37,25 +37,108 @@ function mergeOptions(options) {
     delete cleanOpts.appendDots;
   }
 
-  // merge and return
-  return Object.assign({}, DEFAULT_OPTIONS, cleanOpts);
+  // merge with defaults
+  let resultConf = Object.assign({}, DEFAULT_OPTIONS, cleanOpts);
+
+  if (resultConf.responsive) {
+    // sort responsive configs by breakpoints size ASC
+    resultConf.responsive.sort((a, b) => a.breakpoint - b.breakpoint);
+  }
+
+  return resultConf;
+}
+
+/**
+ * Valid properties in responsive[*].settings
+ * @type {string[]}
+ */
+const VALID_BP_PROPS = ['slidesToShow', 'slidesToScroll', 'infinite'];
+
+/**
+ * Compute which breakpoint config to use based on screen size
+ * @param options
+ * @return {null}
+ */
+function getBreakpointConfig(options) {
+  const { responsive } = options;
+  let bpConfig = null;
+  if (responsive) {
+    // find the relevant config
+    for (let conf of responsive) {
+      if (window.innerWidth <= conf.breakpoint) {
+        // responsive is sorted by breakpoint size ASC
+        // first match is the relevant one
+        // we can stop here
+        bpConfig = conf;
+        break;
+      }
+    }
+    if (bpConfig) {
+      // keep only valid options
+      bpConfig.settings = pick(bpConfig.settings, VALID_BP_PROPS);
+    }
+  }
+  return bpConfig;
 }
 
 export default class Slider {
   constructor(target, options) {
-    this._options = mergeOptions(options);
+    this._setupOptions = mergeOptions(options);
     this._target = getTarget(target);
+
+    // init props
+    this._initialized = false;
+    this._currentPage = 0;
 
     this.showPrev = this.showPrev.bind(this);
     this.showNext = this.showNext.bind(this);
     this._enableTransition = this._enableTransition.bind(this);
     this._handleResize = this._handleResize.bind(this);
 
+    this._computeOptions();
+    this._computeProps();
     this._setupDOM();
+    this._initialized = true;
+  }
+
+  _computeOptions() {
+    let result = {};
+    const bpConfig = getBreakpointConfig(this._setupOptions);
+    if (bpConfig !== this._breakpoint) {
+      const newOptions = Object.assign(
+        {},
+        this._setupOptions,
+        bpConfig && bpConfig.settings,
+      );
+
+      if (this._options) {
+        result = objectDiff(this._options, newOptions);
+      }
+
+      this._breakpoint = bpConfig;
+      this._options = newOptions;
+    }
+    return result;
   }
 
   _setCssVar(name, value) {
     this._target.style.setProperty(name, value);
+  }
+
+  _computeProps() {
+    const { infinite, slidesToShow, slidesToScroll } = this._options;
+    if (!this._initialized) {
+      this._slideCount = this._target.childElementCount;
+    } else {
+      const selector = `.${CLASSES.slide}:not(.${CLASSES.slideClone})`;
+      this._slideCount = this._track.querySelectorAll(selector).length;
+    }
+    this._pageCount = Math.ceil(
+      (this._slideCount + slidesToScroll - slidesToShow) / slidesToScroll,
+    );
+    // bound current page to page count
+    this._currentPage = Math.min(this._currentPage, this._pageCount - 1);
+    this._clonePerSide = infinite ? 2 * slidesToShow : 0;
   }
 
   /**
@@ -63,23 +146,9 @@ export default class Slider {
    * @private
    */
   _setupDOM() {
-    const {
-      appendDots,
-      dots,
-      rtl,
-      slidesToShow,
-      slidesToScroll,
-      infinite,
-    } = this._options;
+    const { rtl, infinite } = this._options;
 
     const children = Array.from(this._target.children);
-
-    this._slideCount = children.length;
-
-    this._currentPage = 0;
-    this._pageCount = Math.ceil(
-      (this._slideCount + slidesToScroll - slidesToShow) / slidesToScroll,
-    );
 
     this._target.classList.add(CLASSES.root);
 
@@ -101,7 +170,65 @@ export default class Slider {
       rtl ? this._prevArrow : this._nextArrow,
     ]);
 
+    this._setupDotsDOM();
+
+    this._setCssVar(CSS_VARS.slideDOMIndex, this._clonePerSide);
+
+    this._track = htmlUtils.createElement('div', {
+      className: CLASSES.track,
+    });
+    htmlUtils.append(this._trackContainer, this._track);
+    this._computeSize();
+
+    children.forEach((child) => {
+      if (child instanceof HTMLElement) {
+        child.classList.add(CLASSES.slide);
+        this._track.appendChild(child);
+      }
+    });
+
+    if (infinite) {
+      this._setupInfiniteDOM();
+    }
+
+    this._computeSlidesClasses(0);
+
+    // defer activation of transitions to next repaint
+    requestAnimationFrame(this._enableTransition);
+
+    // setup listeners
+    window.addEventListener('resize', debounce(this._handleResize, 50));
+  }
+
+  _setupInfiniteDOM() {
+    const slides = Array.from(
+      this._track.querySelectorAll(`.${CLASSES.slide}`),
+    );
+    const firstSlide = this._track.firstChild;
+    let cloneList = slides;
+    while (cloneList.length < this._clonePerSide) {
+      cloneList = cloneList.concat(slides);
+    }
+    const clonesStart = cloneList.slice(-this._clonePerSide).map((child) => {
+      const clone = child.cloneNode(true);
+      clone.classList.add(CLASSES.slideClone);
+      return clone;
+    });
+    cloneList.slice(0, this._clonePerSide).forEach((child) => {
+      const clone = child.cloneNode(true);
+      clone.classList.add(CLASSES.slideClone);
+      this._track.appendChild(clone);
+    });
+    clonesStart.forEach((clone) => this._track.insertBefore(clone, firstSlide));
+  }
+
+  _setupDotsDOM() {
+    const { appendDots, dots } = this._options;
     if (dots) {
+      if (this._dots) {
+        // remove existing DOM
+        this._dots.remove();
+      }
       // create each dot
       let dotsItems = new Array(this._pageCount)
         .fill(null)
@@ -122,58 +249,47 @@ export default class Slider {
       let container = appendDots || this._target;
       container.appendChild(this._dots);
     }
-
-    this._clonePerSide = infinite ? 2 * slidesToShow : 0;
-    this._setCssVar(CSS_VARS.slideDOMIndex, this._clonePerSide);
-
-    this._track = htmlUtils.createElement('div', {
-      className: CLASSES.track,
-    });
-    htmlUtils.append(this._trackContainer, this._track);
-    this._computeSize();
-
-    children.forEach((child) => {
-      if (child instanceof HTMLElement) {
-        child.classList.add(CLASSES.slide);
-        this._track.appendChild(child);
-      }
-    });
-
-    if (infinite) {
-      const firstSlide = this._track.firstChild;
-      let cloneList = children;
-      while (cloneList.length < this._clonePerSide) {
-        cloneList = cloneList.concat(children);
-      }
-      const clonesStart = cloneList.slice(-this._clonePerSide).map((child) => {
-        const clone = child.cloneNode(true);
-        clone.classList.add(CLASSES.slideClone);
-        return clone;
-      });
-      cloneList.slice(0, this._clonePerSide).forEach((child) => {
-        const clone = child.cloneNode(true);
-        clone.classList.add(CLASSES.slideClone);
-        this._track.appendChild(clone);
-      });
-      clonesStart.forEach((clone) =>
-        this._track.insertBefore(clone, firstSlide),
-      );
-    }
-
-    this._computeSlidesClasses(0);
-
-    // defer activation of transitions to next repaint
-    requestAnimationFrame(this._enableTransition);
-
-    // setup listeners
-    window.addEventListener('resize', debounce(this._handleResize, 50));
   }
 
   _handleResize() {
+    const { responsive } = this._options;
     this._disableTransition();
+
+    if (responsive) {
+      const optionsChanged = this._computeOptions();
+      this._computeProps();
+      this._processOptionsChange(optionsChanged);
+    }
+
     this._computeSize();
+
+    if (responsive) {
+      this._setupDotsDOM();
+      this._goToPage(this._currentPage);
+    }
+
     // defer activation of transitions to next repaint
     requestAnimationFrame(this._enableTransition);
+  }
+
+  _processOptionsChange(optionsChanged) {
+    const { infinite } = this._options;
+
+    const anyChanged = (props) =>
+      props.some((x) => optionsChanged.hasOwnProperty(x));
+
+    if (anyChanged(['infinite', 'slidesToShow'])) {
+      // recompute infinite
+      // destroy clones anyway
+      this._track
+        .querySelectorAll(`.${CLASSES.slideClone}`)
+        .forEach((e) => e.remove());
+
+      if (infinite) {
+        // setup infinite
+        this._setupInfiniteDOM();
+      }
+    }
   }
 
   /**
@@ -190,7 +306,7 @@ export default class Slider {
    * @private
    */
   _computeSlidesClasses(slideIndex) {
-    const { dots, infinite, slidesToShow } = this._options;
+    const { dots, slidesToShow } = this._options;
     const highlightIndex = [];
     for (let i = slideIndex; i < slideIndex + slidesToShow; i++) {
       const domIdx = i + this._clonePerSide;
@@ -211,6 +327,18 @@ export default class Slider {
     });
 
     // ARROWS
+    this._computeArrowClasses();
+
+    // DOTS
+    if (dots) {
+      const dotItems = this._dots.querySelectorAll(`.${CLASSES.dot}`);
+      dotItems.forEach((item) => item.classList.remove(CLASSES.current));
+      dotItems[this._currentPage].classList.add(CLASSES.current);
+    }
+  }
+
+  _computeArrowClasses() {
+    const { infinite } = this._options;
     if (!infinite) {
       if (this._currentPage === 0) {
         this._prevArrow.classList.add(CLASSES.arrowDisabled);
@@ -222,13 +350,9 @@ export default class Slider {
       } else {
         this._nextArrow.classList.remove(CLASSES.arrowDisabled);
       }
-    }
-
-    // DOTS
-    if (dots) {
-      const dotItems = this._dots.querySelectorAll(`.${CLASSES.dot}`);
-      dotItems.forEach((item) => item.classList.remove(CLASSES.current));
-      dotItems[this._currentPage].classList.add(CLASSES.current);
+    } else {
+      this._prevArrow.classList.remove(CLASSES.arrowDisabled);
+      this._nextArrow.classList.remove(CLASSES.arrowDisabled);
     }
   }
 

@@ -5,6 +5,8 @@ export const DEFAULT_OPTIONS = {
   dots: true,
   // Enable or disable infinite behavior
   infinite: true,
+  // breakpoints config
+  responsive: null,
   // Number of slide to show at once
   slidesToShow: 1,
   // Number of slide to scroll when clicking on arrow
