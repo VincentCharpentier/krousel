@@ -1,12 +1,17 @@
 export const DEFAULT_OPTIONS = {
-  dots: true, // TODO
+  // Change where the navigation dots are attached
+  appendDots: null,
+  // Display or Hide dots
+  dots: true,
+  // Enable or disable infinite behavior
   infinite: true,
+  // Number of slide to show at once
   slidesToShow: 1,
+  // Number of slide to scroll when clicking on arrow
   slidesToScroll: 1,
+  // transition speed when changing slide
   speed: 300,
 
-  // Change where the navigation dots are attached
-  appendDots: null, // TODO
   autoplay: false, // TODO
   autoplaySpeed: 3000, // TODO
   arrows: true, // TODO

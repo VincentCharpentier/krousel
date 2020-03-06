@@ -7,7 +7,12 @@ function makeKrousel({ count = 5, name = '', className, ...config }) {
   sectionTitle.innerHTML = name;
   section.appendChild(sectionTitle);
   let configDesc = document.createElement('pre');
-  configDesc.innerHTML = JSON.stringify(config, null, 2);
+  configDesc.innerHTML = JSON.stringify(config, (key,value)=>{
+    if (value instanceof HTMLElement) {
+      return value.constructor.name;
+    }
+    return value;
+  }, 2);
   section.appendChild(configDesc);
   let target = document.createElement('div');
   section.appendChild(target);

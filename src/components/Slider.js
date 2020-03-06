@@ -1,14 +1,16 @@
 import { DEFAULT_OPTIONS, CSS_VARS, CLASSES } from '../constants';
 import KrouselError, { INVALID_TARGET } from '../errors';
-import { htmlUtils } from '../utils';
+import { htmlUtils, validators } from '../utils';
 
 import './Slider.scss';
+
+const { isInstance, isInteger, isBoolean } = validators;
 
 function getTarget(targetArg) {
   let result = targetArg;
   if (typeof targetArg === 'string') {
     result = document.getElementById(targetArg);
-  } else if (targetArg instanceof HTMLElement) {
+  } else if (isInstance(targetArg, HTMLElement)) {
     result = targetArg;
   } else {
     throw new KrouselError(INVALID_TARGET);
@@ -16,9 +18,32 @@ function getTarget(targetArg) {
   return result;
 }
 
+function mergeOptions(options) {
+  let cleanOpts = Object.assign({}, options);
+  // generic warn function
+  const sendWarn = (optName, expected, actual) =>
+    console.warn(
+      `Krousel - Invalid option '${optName}' will be ignored. Expected ${expected}, got: ${actual}`,
+    );
+  // validate options
+  const { appendDots } = options;
+  if (appendDots && !isInstance(appendDots, HTMLElement)) {
+    // erase option
+    let actual =
+      (appendDots.constructor && appendDots.constructor.name) ||
+      (appendDots.prototype && appendDots.prototype.name) ||
+      appendDots;
+    sendWarn('appendDots', 'HTMLElement', actual);
+    delete cleanOpts.appendDots;
+  }
+
+  // merge and return
+  return Object.assign({}, DEFAULT_OPTIONS, cleanOpts);
+}
+
 export default class Slider {
   constructor(target, options) {
-    this._options = Object.assign({}, DEFAULT_OPTIONS, options);
+    this._options = mergeOptions(options);
     this._target = getTarget(target);
     this._setupDOM();
   }
@@ -32,7 +57,14 @@ export default class Slider {
    * @private
    */
   _setupDOM() {
-    const { dots, rtl, slidesToShow, slidesToScroll, infinite } = this._options;
+    const {
+      appendDots,
+      dots,
+      rtl,
+      slidesToShow,
+      slidesToScroll,
+      infinite,
+    } = this._options;
 
     const children = Array.from(this._target.children);
 
@@ -57,11 +89,11 @@ export default class Slider {
       className: CLASSES.trackContainer,
     });
 
-    let targetChildren = [
+    htmlUtils.append(this._target, [
       rtl ? this._nextArrow : this._prevArrow,
       trackContainer,
       rtl ? this._prevArrow : this._nextArrow,
-    ];
+    ]);
 
     if (dots) {
       // create each dot
@@ -80,10 +112,10 @@ export default class Slider {
         },
         dotsItems,
       );
-      targetChildren.push(this._dots);
-    }
 
-    htmlUtils.append(this._target, targetChildren);
+      let container = appendDots || this._target;
+      container.appendChild(this._dots);
+    }
 
     const clonePerSide = infinite ? 2 * slidesToShow : 0;
     this._clonePerSide = clonePerSide;
@@ -141,6 +173,11 @@ export default class Slider {
     // TODO
   }
 
+  /**
+   * Update all classes for a given slide display
+   * @param slideIndex
+   * @private
+   */
   _computeSlidesClasses(slideIndex) {
     const { dots, infinite, slidesToShow } = this._options;
     const highlightIndex = [];
