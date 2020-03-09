@@ -1,3 +1,8 @@
+export const TRANSITION = {
+  SLIDE: 'slide',
+  FADE: 'fade',
+};
+
 export const DEFAULT_OPTIONS = {
   // Change where the navigation dots are attached
   appendDots: null,
@@ -18,6 +23,7 @@ export const DEFAULT_OPTIONS = {
   autoplaySpeed: 3000, // TODO
   arrows: true, // TODO
   draggable: true, // TODO
+  transition: TRANSITION.SLIDE, // TODO
   pauseOnFocus: true, // TODO
   pauseOnHover: true, // TODO
   rtl: false, // TODO
