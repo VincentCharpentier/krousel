@@ -48,4 +48,7 @@ function makeLensSection(section) {
     });
   }
 }
-document.querySelectorAll('.lens').forEach(makeLensSection);
+
+window.addEventListener('load', function() {
+  document.querySelectorAll('.lens').forEach(makeLensSection);
+})

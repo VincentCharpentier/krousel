@@ -1,16 +1,18 @@
 $transition-duration: 500ms;
 $transition-delay: 250ms;
 $transition-fn: ease-in-out;
-$effect-factor: 1.25;
+$effect-factor: 1.15;
 
 .lens {
+  margin-bottom: 2em;
   .k-track-container {
     position: relative;
     margin-left: 0;
-    transition: margin-left $transition-duration $transition-fn $transition-delay;
+    transition: margin-left $transition-duration $transition-fn;
 
     $factor: ($effect-factor - 1);
     &.stepBack {
+      transition-delay: $transition-delay;
       margin-left: calc(var(--slide-width) * #{-$factor / 2});
       &.firstFocused {
         margin-left: 0;
@@ -22,7 +24,7 @@ $effect-factor: 1.25;
   }
 
   .lens-wrapper {
-    transition: transform $transition-duration $transition-fn $transition-delay;
+    transition: transform $transition-duration $transition-fn;
     width: var(--slide-width);
     margin: 0 auto;
   }
@@ -34,13 +36,15 @@ $effect-factor: 1.25;
 
   .k-slide-visible {
     transition: opacity 300ms ease-in-out,
-    width $transition-duration $transition-fn $transition-delay;
+    width $transition-duration $transition-fn;
     margin: 0;
 
     &:hover {
+      transition-delay: $transition-delay;
       width: calc(var(--slide-width) * #{$effect-factor});
 
       .lens-wrapper {
+        transition-delay: $transition-delay;
         transform: scale($effect-factor);
       }
     }
