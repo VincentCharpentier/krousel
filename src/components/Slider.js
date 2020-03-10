@@ -155,28 +155,18 @@ export default class Slider {
    * @private
    */
   _setupDOM() {
-    const { rtl, speed, infinite } = this._options;
+    const { speed, infinite } = this._options;
 
     const children = Array.from(this._target.children);
 
     this._target.classList.add(CLASSES.root);
 
-    this._prevArrow = htmlUtils.createElement('div', {
-      className: CLASSES.arrowLeft,
-    });
-    this._nextArrow = htmlUtils.createElement('div', {
-      className: CLASSES.arrowRight,
-    });
     this._trackContainer = htmlUtils.createElement('div', {
       className: CLASSES.trackContainer,
     });
+    this._target.appendChild(this._trackContainer);
 
-    htmlUtils.append(this._target, [
-      rtl ? this._nextArrow : this._prevArrow,
-      this._trackContainer,
-      rtl ? this._prevArrow : this._nextArrow,
-    ]);
-
+    this._setupArrowsDOM();
     this._setupDotsDOM();
 
     this._setCssVar(CSS_VARS.slideDOMIndex, this._clonePerSide);
@@ -233,6 +223,25 @@ export default class Slider {
     clonesStart.forEach((clone) => this._track.insertBefore(clone, firstSlide));
   }
 
+  _setupArrowsDOM() {
+    const { arrows, rtl } = this._options;
+    if (arrows) {
+      this._prevArrow = htmlUtils.createElement('div', {
+        className: CLASSES.arrowLeft,
+      });
+      this._nextArrow = htmlUtils.createElement('div', {
+        className: CLASSES.arrowRight,
+      });
+      // append at first position
+      this._target.insertBefore(
+        rtl ? this._nextArrow : this._prevArrow,
+        this._target.firstChild,
+      );
+      // append at last position
+      this._target.appendChild(rtl ? this._prevArrow : this._nextArrow);
+    }
+  }
+
   _setupDotsDOM() {
     const { appendDots, dots } = this._options;
     if (dots) {
@@ -260,10 +269,12 @@ export default class Slider {
   }
 
   _setupListeners() {
-    const { dots, autoplay, pauseOnHover } = this._options;
-    window.addEventListener('resize', debounce(this._handleResize, 50));
-    this._prevArrow.addEventListener('click', this._requestPrev);
-    this._nextArrow.addEventListener('click', this._requestNext);
+    const { arrows, dots, autoplay, pauseOnHover } = this._options;
+    window.addEventListener('resize', debounce(this._handleResize, 100));
+    if (arrows) {
+      this._prevArrow.addEventListener('click', this._requestPrev);
+      this._nextArrow.addEventListener('click', this._requestNext);
+    }
     if (dots) {
       this._dots
         .querySelectorAll(`.${CLASSES.dot}`)
@@ -408,21 +419,23 @@ export default class Slider {
   }
 
   _computeArrowClasses() {
-    const { infinite } = this._options;
-    if (!infinite) {
-      if (this._currentPage === 0) {
-        this._prevArrow.classList.add(CLASSES.arrowDisabled);
+    const { arrows, infinite } = this._options;
+    if (arrows) {
+      if (!infinite) {
+        if (this._currentPage === 0) {
+          this._prevArrow.classList.add(CLASSES.arrowDisabled);
+        } else {
+          this._prevArrow.classList.remove(CLASSES.arrowDisabled);
+        }
+        if (this._currentPage === this._pageCount - 1) {
+          this._nextArrow.classList.add(CLASSES.arrowDisabled);
+        } else {
+          this._nextArrow.classList.remove(CLASSES.arrowDisabled);
+        }
       } else {
         this._prevArrow.classList.remove(CLASSES.arrowDisabled);
-      }
-      if (this._currentPage === this._pageCount - 1) {
-        this._nextArrow.classList.add(CLASSES.arrowDisabled);
-      } else {
         this._nextArrow.classList.remove(CLASSES.arrowDisabled);
       }
-    } else {
-      this._prevArrow.classList.remove(CLASSES.arrowDisabled);
-      this._nextArrow.classList.remove(CLASSES.arrowDisabled);
     }
   }
 

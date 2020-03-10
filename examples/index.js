@@ -57,6 +57,12 @@ const CONFIGS = [
     infinite: true,
   },
   {
+    name: 'Disable arrows',
+    count: 5,
+    arrows: false,
+    autoplay: true,
+  },
+  {
     name: 'Show multiple',
     count: 5,
     slidesToShow: 2,

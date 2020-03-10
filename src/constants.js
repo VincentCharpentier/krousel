@@ -6,6 +6,8 @@ export const TRANSITION = {
 export const DEFAULT_OPTIONS = {
   // Change where the navigation dots are attached
   appendDots: null,
+  // enable or disable arrows
+  arrows: true,
   // Auto play the carousel
   autoplay: false,
   // Change the interval at which autoplay change slide
@@ -25,7 +27,6 @@ export const DEFAULT_OPTIONS = {
   // transition speed when changing slide
   speed: 300,
 
-  arrows: true, // TODO
   draggable: true, // TODO
   transition: TRANSITION.SLIDE, // TODO
   rtl: false, // TODO
