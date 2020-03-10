@@ -13,6 +13,8 @@
 .k-track {
   --dX: calc(-1 * var(--slide-width) * var(--slide-didx));
   transform: translate3d(var(--dX), 0, 0);
+  transition-property: transform;
+  transition-timing-function: ease-in-out;
 
   &:before, &:after {
     display: table;
@@ -69,4 +71,8 @@
   &.k-current {
     opacity: 1;
   }
+}
+
+.k-no-transition {
+  transition: none !important;
 }

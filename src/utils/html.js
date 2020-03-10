@@ -31,7 +31,10 @@ const htmlUtils = {
   },
   makeStyle(props) {
     return Object.entries(props)
-      .map(([k, v]) => `${k}:${v}`)
+      .map(([k, v]) => {
+        const key = k.replace(/[A-Z]/g, (s) => '-' + s.toLowerCase());
+        return `${key}:${v}`;
+      })
       .join(';');
   },
 };

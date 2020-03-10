@@ -49,6 +49,14 @@ const CONFIGS = [
     className: 'slow',
   },
   {
+    name: 'Autoplay',
+    count: 2,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    pauseOnHover: true,
+    infinite: true,
+  },
+  {
     name: 'Show multiple',
     count: 5,
     slidesToShow: 2,

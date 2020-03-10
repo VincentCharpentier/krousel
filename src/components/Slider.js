@@ -90,15 +90,24 @@ export default class Slider {
     this._initialized = false;
     this._currentPage = 0;
 
-    this.showPrev = this.showPrev.bind(this);
-    this.showNext = this.showNext.bind(this);
+    this._showPrev = this._showPrev.bind(this);
+    this._showNext = this._showNext.bind(this);
     this._enableTransition = this._enableTransition.bind(this);
     this._handleResize = this._handleResize.bind(this);
+    this._stopAutoplay = this._stopAutoplay.bind(this);
+    this._startAutoplay = this._startAutoplay.bind(this);
+    this._resumeAutoplay = this._resumeAutoplay.bind(this);
+    this._pauseAutoplay = this._pauseAutoplay.bind(this);
+    this._doAutoplay = this._doAutoplay.bind(this);
+    this._requestNext = this._requestNext.bind(this);
+    this._requestPrev = this._requestPrev.bind(this);
+    this._requestGoTo = this._requestGoTo.bind(this);
 
     this._computeOptions();
     this._computeProps();
     this._setupDOM();
     this._initialized = true;
+    this._startAutoplay();
   }
 
   _computeOptions() {
@@ -146,7 +155,7 @@ export default class Slider {
    * @private
    */
   _setupDOM() {
-    const { rtl, infinite } = this._options;
+    const { rtl, speed, infinite } = this._options;
 
     const children = Array.from(this._target.children);
 
@@ -155,11 +164,9 @@ export default class Slider {
     this._prevArrow = htmlUtils.createElement('div', {
       className: CLASSES.arrowLeft,
     });
-    this._prevArrow.addEventListener('click', this.showPrev);
     this._nextArrow = htmlUtils.createElement('div', {
       className: CLASSES.arrowRight,
     });
-    this._nextArrow.addEventListener('click', this.showNext);
     this._trackContainer = htmlUtils.createElement('div', {
       className: CLASSES.trackContainer,
     });
@@ -176,6 +183,9 @@ export default class Slider {
 
     this._track = htmlUtils.createElement('div', {
       className: CLASSES.track,
+      style: htmlUtils.makeStyle({
+        transitionDuration: `${speed}ms`,
+      }),
     });
     htmlUtils.append(this._trackContainer, this._track);
     this._computeSize();
@@ -193,11 +203,12 @@ export default class Slider {
 
     this._computeSlidesClasses(0);
 
-    // defer activation of transitions to next repaint
-    requestAnimationFrame(this._enableTransition);
+    // force reflow before activating transitions
+    this.__forceReflow();
+    this._enableTransition();
 
     // setup listeners
-    window.addEventListener('resize', debounce(this._handleResize, 50));
+    this._setupListeners();
   }
 
   _setupInfiniteDOM() {
@@ -230,14 +241,11 @@ export default class Slider {
         this._dots.remove();
       }
       // create each dot
-      let dotsItems = new Array(this._pageCount)
+      const dotsItems = new Array(this._pageCount)
         .fill(null)
         .map((__) =>
           htmlUtils.createElement('div', { className: CLASSES.dot }),
         );
-      dotsItems.forEach((d, i) =>
-        d.addEventListener('click', () => this._goToPage(i)),
-      );
       this._dots = htmlUtils.createElement(
         'div',
         {
@@ -249,6 +257,67 @@ export default class Slider {
       let container = appendDots || this._target;
       container.appendChild(this._dots);
     }
+  }
+
+  _setupListeners() {
+    const { dots, autoplay, pauseOnHover } = this._options;
+    window.addEventListener('resize', debounce(this._handleResize, 50));
+    this._prevArrow.addEventListener('click', this._requestPrev);
+    this._nextArrow.addEventListener('click', this._requestNext);
+    if (dots) {
+      this._dots
+        .querySelectorAll(`.${CLASSES.dot}`)
+        .forEach((d, i) =>
+          d.addEventListener('click', () => this._requestGoTo(i)),
+        );
+    }
+    if (autoplay) {
+      let slides = this._track.querySelectorAll(`.${CLASSES.slide}`);
+      const handleMouseOut = (e) => {
+        const doStart = !e.currentTarget.contains(e.relatedTarget);
+        if (doStart) {
+          this._resumeAutoplay();
+        }
+      };
+      if (pauseOnHover) {
+        slides.forEach((slide) => {
+          slide.addEventListener('mouseenter', this._pauseAutoplay);
+          slide.addEventListener('mouseout', handleMouseOut);
+        });
+      }
+    }
+  }
+
+  _startAutoplay() {
+    const { autoplay } = this._options;
+    if (autoplay) {
+      this._apStopped = false;
+      this._resumeAutoplay();
+    }
+  }
+
+  _pauseAutoplay() {
+    clearTimeout(this._autoplayTimer);
+  }
+
+  _resumeAutoplay() {
+    const { autoplay, autoplaySpeed } = this._options;
+    if (autoplay && !this._apStopped) {
+      // make sure we were stopped
+      clearTimeout(this._autoplayTimer);
+      this._autoplayTimer = setTimeout(this._doAutoplay, autoplaySpeed);
+    }
+  }
+
+  _stopAutoplay() {
+    this._apStopped = true;
+    this._pauseAutoplay();
+  }
+
+  _doAutoplay() {
+    const { speed, autoplaySpeed } = this._options;
+    this._showNext();
+    this._autoplayTimer = setTimeout(this._doAutoplay, autoplaySpeed + speed);
   }
 
   _handleResize() {
@@ -268,8 +337,9 @@ export default class Slider {
       this._goToPage(this._currentPage);
     }
 
-    // defer activation of transitions to next repaint
-    requestAnimationFrame(this._enableTransition);
+    // force reflow before re-activating transitions
+    this.__forceReflow();
+    this._enableTransition();
   }
 
   _processOptionsChange(optionsChanged) {
@@ -357,11 +427,12 @@ export default class Slider {
   }
 
   _goToPage(pageIndex) {
+    // if a goto postprocess were deferred
     if (this.__goToPage_defer) {
-      // execute immediately the deferred callback;
+      // execute immediately the deferred callback
       this.__goToPage_defer();
       // re-process goto instruction before next render
-      requestAnimationFrame(() => this._goToPage(pageIndex));
+      this._goToPage(pageIndex);
       return;
     }
     const { slidesToShow, slidesToScroll, speed } = this._options;
@@ -405,25 +476,40 @@ export default class Slider {
     const slideDOMIndex = slideIndex + this._clonePerSide;
     this._setCssVar(CSS_VARS.slideDOMIndex, slideDOMIndex);
     if (postProcess) {
+      // The defered callback occured when we transition to a clone slide
+      // it will translate to the original slide without transition
       this.__goToPage_defer = () => {
         delete this.__goToPage_defer;
         clearTimeout(this.__goToPage_timer);
         // teleport back to index within bounds (after sliding in clones)
         this._disableTransition();
         this._goToPage(finalPageIndex);
-        requestAnimationFrame(this._enableTransition);
+        // Trigger a reflow, flushing the CSS changes
+        this.__forceReflow();
+        // Re-enable CSS after reflow
+        this._enableTransition();
       };
+      // execute after the transition is complete
       this.__goToPage_timer = setTimeout(this.__goToPage_defer, speed);
     }
   }
 
+  /**
+   * Force browser to trigger a reflow
+   * Useful after CSS changes and before (re)enabling transitions
+   * @private
+   */
+  __forceReflow() {
+    // value must be read to avoid browser optimizations that would skip useless reflow
+    this._reflowTrash = this._track.offsetHeight; // DO NOT REMOVE
+  }
+
   _enableTransition() {
-    const { speed } = this._options;
-    this._track.style.transition = `transform ${speed}ms ease-in-out`;
+    this._track.classList.remove(CLASSES.noTransition);
   }
 
   _disableTransition() {
-    this._track.style.transition = 'none';
+    this._track.classList.add(CLASSES.noTransition);
   }
 
   _computeSize() {
@@ -436,17 +522,45 @@ export default class Slider {
       1000}px`;
   }
 
-  showNext() {
+  _showNext() {
     const { infinite } = this._options;
     if (infinite || this._currentPage < this._pageCount - 1) {
       this._goToPage(this._currentPage + 1);
     }
   }
 
-  showPrev() {
+  _showPrev() {
     const { infinite } = this._options;
     if (infinite || this._currentPage > 0) {
       this._goToPage(this._currentPage - 1);
     }
+  }
+
+  /**
+   * User request to show next slide
+   * @private
+   */
+  _requestNext() {
+    this._stopAutoplay();
+    this._showNext();
+  }
+
+  /**
+   * User request to show prev slide
+   * @private
+   */
+  _requestPrev() {
+    this._stopAutoplay();
+    this._showPrev();
+  }
+
+  /**
+   * User request to show a specific slide
+   * @param index
+   * @private
+   */
+  _requestGoTo(index) {
+    this._stopAutoplay();
+    this._goToPage(index);
   }
 }

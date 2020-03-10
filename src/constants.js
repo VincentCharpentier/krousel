@@ -6,10 +6,16 @@ export const TRANSITION = {
 export const DEFAULT_OPTIONS = {
   // Change where the navigation dots are attached
   appendDots: null,
+  // Auto play the carousel
+  autoplay: false,
+  // Change the interval at which autoplay change slide
+  autoplaySpeed: 3000,
   // Display or Hide dots
   dots: true,
   // Enable or disable infinite behavior
   infinite: true,
+  // pause autoplay when a slide is hovered,
+  pauseOnHover: true,
   // breakpoints config
   responsive: null,
   // Number of slide to show at once
@@ -19,13 +25,9 @@ export const DEFAULT_OPTIONS = {
   // transition speed when changing slide
   speed: 300,
 
-  autoplay: false, // TODO
-  autoplaySpeed: 3000, // TODO
   arrows: true, // TODO
   draggable: true, // TODO
   transition: TRANSITION.SLIDE, // TODO
-  pauseOnFocus: true, // TODO
-  pauseOnHover: true, // TODO
   rtl: false, // TODO
 };
 
@@ -42,6 +44,7 @@ export const CLASSES = {
   dots: 'k-dots',
   dot: 'k-dot',
   current: 'k-current',
+  noTransition: 'k-no-transition',
 };
 
 export const CSS_VARS = {
