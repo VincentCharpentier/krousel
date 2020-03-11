@@ -54,7 +54,6 @@ const CONFIGS = [
     name: 'Transition Type',
     count: 5,
     transition: 'fade',
-    slidesToShow: 1,
   },
   {
     name: 'Autoplay',

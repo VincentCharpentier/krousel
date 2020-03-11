@@ -30,6 +30,7 @@ function getTarget(targetArg) {
   return result;
 }
 
+const VALID_TRANSITIONS = Object.values(TRANSITION);
 function mergeOptions(options) {
   let cleanOpts = Object.assign({}, options);
   // generic warn function
@@ -38,7 +39,7 @@ function mergeOptions(options) {
       `Krousel - Invalid option '${optName}' will be ignored. Expected ${expected}, got: ${actual}`,
     );
   // validate options
-  const { appendDots } = options;
+  const { appendDots, transition } = options;
   if (appendDots && !isInstance(appendDots, HTMLElement)) {
     // erase option
     let actual =
@@ -47,6 +48,11 @@ function mergeOptions(options) {
       appendDots;
     sendWarn('appendDots', 'HTMLElement', actual);
     delete cleanOpts.appendDots;
+  }
+
+  if (transition && !VALID_TRANSITIONS.includes(transition)) {
+    sendWarn('transition', `oneOf ${VALID_TRANSITIONS.join('|')}`, transition);
+    delete cleanOpts.transition;
   }
 
   // merge with defaults
