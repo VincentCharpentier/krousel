@@ -248,21 +248,34 @@ export default class Slider {
   }
 
   _setupArrowsDOM() {
-    const { arrows, rtl } = this._options;
+    const { appendArrows, arrows, nextArrow, prevArrow } = this._options;
     if (arrows) {
-      this._prevArrow = htmlUtils.createElement('div', {
-        className: CLASSES.arrowLeft,
-      });
-      this._nextArrow = htmlUtils.createElement('div', {
-        className: CLASSES.arrowRight,
-      });
-      // append at first position
-      this._target.insertBefore(
-        rtl ? this._nextArrow : this._prevArrow,
-        this._target.firstChild,
-      );
-      // append at last position
-      this._target.appendChild(rtl ? this._prevArrow : this._nextArrow);
+      this._prevArrow =
+        prevArrow ||
+        htmlUtils.createElement('div', {
+          className: CLASSES.arrowLeft,
+        });
+      this._nextArrow =
+        nextArrow ||
+        htmlUtils.createElement('div', {
+          className: CLASSES.arrowRight,
+        });
+      let insertTarget = appendArrows || this._target;
+      // append prevArrow only if it was not already connected to DOM
+      if (!this._prevArrow.isConnected) {
+        // append at first position
+        if (insertTarget.childElementCount > 0) {
+          insertTarget.insertBefore(this._prevArrow, insertTarget.firstChild);
+        } else {
+          insertTarget.appendChild(this._prevArrow);
+        }
+      }
+
+      // append nextArrow only if it was not already connected to DOM
+      if (!this._nextArrow.isConnected) {
+        // append at last position
+        insertTarget.appendChild(this._nextArrow);
+      }
     }
   }
 

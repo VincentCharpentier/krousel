@@ -4,6 +4,8 @@ export const TRANSITION = {
 };
 
 export const DEFAULT_OPTIONS = {
+  // Change where arrows are attached (default is the target)
+  appendArrows: null,
   // Change where the navigation dots are attached
   appendDots: null,
   // enable or disable arrows
@@ -16,8 +18,12 @@ export const DEFAULT_OPTIONS = {
   dots: true,
   // Enable or disable infinite behavior
   infinite: true,
+  // Customize the "next" arrow
+  nextArrow: null,
   // pause autoplay when a slide is hovered,
   pauseOnHover: true,
+  // Customize the "previous" arrow
+  prevArrow: null,
   // breakpoints config
   responsive: null,
   // Number of slide to show at once
@@ -30,6 +36,7 @@ export const DEFAULT_OPTIONS = {
   // NOTE: transition 'fade' disable options slidesToShow and slidesToScroll
   transition: TRANSITION.SLIDE,
 
+  // Enable dragging the slider track with touch or mouse
   draggable: true, // TODO
   rtl: false, // TODO
 };

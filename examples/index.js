@@ -29,7 +29,7 @@ function makeKrousel({ count = 5, name = '', className, ...config }) {
     slide.appendChild(title);
     target.append(slide);
   });
-  document.body.appendChild(section);
+  document.getElementById('target').appendChild(section);
   new Krousel(target, config);
 }
 
@@ -126,4 +126,25 @@ const CONFIGS = [
 
 window.addEventListener('load', function() {
   CONFIGS.map(makeKrousel);
+
+  // do krousel with custom inserts
+  let section = document.getElementById('customTargets');
+  section.querySelector('pre').innerHTML = `{
+  appendDots: HTMLElement
+  appendArrows: HTMLElement
+}`;
+  new Krousel(section.querySelector('.slider'), {
+    appendDots: section.querySelector('.top-zone'),
+    appendArrows: section.querySelector('.top-zone'),
+  });
+
+  section = document.getElementById('customArrows');
+  section.querySelector('pre').innerHTML = `{
+  prevArrow: HTMLElement
+  nextArrow: HTMLElement
+}`;
+  new Krousel(section.querySelector('.slider'), {
+    prevArrow: section.querySelector('.go-prev'),
+    nextArrow: section.querySelector('.go-next'),
+  });
 });
