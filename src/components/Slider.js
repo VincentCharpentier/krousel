@@ -1,8 +1,20 @@
-import { DEFAULT_OPTIONS, CSS_VARS, CLASSES } from '../constants';
+import { DEFAULT_OPTIONS, CSS_VARS, CLASSES, TRANSITION } from '../constants';
 import KrouselError, { INVALID_TARGET } from '../errors';
-import { htmlUtils, validators, debounce, pick, objectDiff } from '../utils';
+import {
+  htmlUtils,
+  validators,
+  debounce,
+  pick,
+  objectDiff,
+  classNames,
+} from '../utils';
 
 import './Slider.scss';
+
+const TRANSITION_CLASS = {
+  [TRANSITION.SLIDE]: CLASSES.transitionSlide,
+  [TRANSITION.FADE]: CLASSES.transitionFade,
+};
 
 const { isInstance, isInteger, isBoolean } = validators;
 
@@ -155,15 +167,28 @@ export default class Slider {
    * @private
    */
   _setupDOM() {
-    const { speed, infinite } = this._options;
+    const { transition, speed, infinite } = this._options;
 
     const children = Array.from(this._target.children);
 
     this._target.classList.add(CLASSES.root);
 
-    this._trackContainer = htmlUtils.createElement('div', {
-      className: CLASSES.trackContainer,
+    this._track = htmlUtils.createElement('div', {
+      className: classNames(CLASSES.track, TRANSITION_CLASS[transition]),
+      style: htmlUtils.makeStyle({
+        transitionDuration: `${speed}ms`,
+      }),
     });
+    this._disableTransition();
+
+    this._trackContainer = htmlUtils.createElement(
+      'div',
+      {
+        className: CLASSES.trackContainer,
+      },
+      this._track,
+    );
+
     this._target.appendChild(this._trackContainer);
 
     this._setupArrowsDOM();
@@ -171,13 +196,6 @@ export default class Slider {
 
     this._setCssVar(CSS_VARS.slideDOMIndex, this._clonePerSide);
 
-    this._track = htmlUtils.createElement('div', {
-      className: CLASSES.track,
-      style: htmlUtils.makeStyle({
-        transitionDuration: `${speed}ms`,
-      }),
-    });
-    htmlUtils.append(this._trackContainer, this._track);
     this._computeSize();
 
     children.forEach((child) => {

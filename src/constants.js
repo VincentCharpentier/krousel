@@ -26,9 +26,11 @@ export const DEFAULT_OPTIONS = {
   slidesToScroll: 1,
   // transition speed when changing slide
   speed: 300,
+  // Change transition type when changing slide
+  // NOTE: transition 'fade' disable options slidesToShow and slidesToScroll
+  transition: TRANSITION.SLIDE,
 
   draggable: true, // TODO
-  transition: TRANSITION.SLIDE, // TODO
   rtl: false, // TODO
 };
 
@@ -46,6 +48,8 @@ export const CLASSES = {
   dot: 'k-dot',
   current: 'k-current',
   noTransition: 'k-no-transition',
+  transitionSlide: 'k-tr-slide',
+  transitionFade: 'k-tr-fade',
 };
 
 export const CSS_VARS = {

@@ -4,3 +4,4 @@ export { validators };
 export { default as debounce } from './debounce';
 export { default as pick } from './pick';
 export { default as objectDiff } from './objectDiff';
+export { default as classNames } from './classNames';

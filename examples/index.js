@@ -24,6 +24,8 @@ function makeKrousel({ count = 5, name = '', className, ...config }) {
     let slide = document.createElement('div');
     let title = document.createElement('h3');
     title.innerHTML = (i + 1).toString();
+    const color = Math.round((i / count) * 255);
+    title.style.backgroundColor = `hsl(${color}, 80%,80%)`;
     slide.appendChild(title);
     target.append(slide);
   });
@@ -47,6 +49,12 @@ const CONFIGS = [
     count: 5,
     speed: 1000,
     className: 'slow',
+  },
+  {
+    name: 'Transition Type',
+    count: 5,
+    transition: 'fade',
+    slidesToShow: 1,
   },
   {
     name: 'Autoplay',
