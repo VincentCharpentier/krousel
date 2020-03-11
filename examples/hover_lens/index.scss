@@ -4,8 +4,10 @@ $transition-fn: ease-in-out;
 $effect-factor: 1.15;
 
 .lens {
+  overflow: hidden;
   margin-bottom: 2em;
   .k-track-container {
+    overflow: visible;
     position: relative;
     margin-left: 0;
     transition: margin-left $transition-duration $transition-fn;

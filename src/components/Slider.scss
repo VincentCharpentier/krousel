@@ -8,6 +8,7 @@
 .k-track-container {
   display: inline-block;
   width: 100%;
+  overflow: hidden;
 }
 
 .k-track {
@@ -95,6 +96,7 @@
   opacity: .2;
   transition: opacity 250ms ease;
   width: $size;
+
   &.k-current {
     opacity: 1;
   }

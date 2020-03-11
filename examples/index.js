@@ -24,7 +24,7 @@ function makeKrousel({ count = 5, name = '', className, ...config }) {
     let slide = document.createElement('div');
     let title = document.createElement('h3');
     title.innerHTML = (i + 1).toString();
-    const color = Math.round((i / count) * 255);
+    const color = Math.round((i / count) * 360);
     title.style.backgroundColor = `hsl(${color}, 80%,80%)`;
     slide.appendChild(title);
     target.append(slide);
@@ -56,7 +56,7 @@ const CONFIGS = [
     transition: 'fade',
   },
   {
-    name: 'Autoplay',
+    name: 'Autoplay (pause when hovered)',
     count: 2,
     autoplay: true,
     autoplaySpeed: 3000,
@@ -114,21 +114,17 @@ const CONFIGS = [
       },
     ],
   },
-  {
-    name: 'hover lens effect',
-    className: 'lens',
-    infinite: true,
-    zoomHover: true,
-    count: 10,
-    slidesToShow: 3,
-  },
 ];
 
 window.addEventListener('load', function() {
   CONFIGS.map(makeKrousel);
+  let section = document.getElementById('hoverEffect');
+  new Krousel(section.querySelector('.slider'), {
+    slidesToShow: 3,
+  });
 
   // do krousel with custom inserts
-  let section = document.getElementById('customTargets');
+  section = document.getElementById('customTargets');
   section.querySelector('pre').innerHTML = `{
   appendDots: HTMLElement
   appendArrows: HTMLElement
