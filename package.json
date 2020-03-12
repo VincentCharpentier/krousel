@@ -8,7 +8,9 @@
   "scripts": {
     "build": "microbundle --name Krousel",
     "watch": "microbundle watch --name Krousel",
-    "examples": "parcel ./examples/index.html -d public --open & http-server dist -p 8082",
+    "watch:examples": "parcel ./examples/index.html --out-dir public --open",
+    "build:examples": "parcel build ./examples/index.html --out-dir docs",
+    "serve:examples": "http-server docs -p 8082",
     "prettier": "prettier --write src/*"
   },
   "targets": "> 0.25%, not dead",
