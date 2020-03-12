@@ -1,3 +1,5 @@
+import Krousel from '../dist/krousel';
+
 function makeKrousel({ count = 5, name = '', className, ...config }) {
   let section = document.createElement('section');
   if (className) {
@@ -25,7 +27,7 @@ function makeKrousel({ count = 5, name = '', className, ...config }) {
     let title = document.createElement('h3');
     title.innerHTML = (i + 1).toString();
     const color = Math.round((i / count) * 360);
-    title.style.backgroundColor = `hsl(${color}, 80%,80%)`;
+    title.style.backgroundColor = `hsl(${color}, 60%, 60%)`;
     slide.appendChild(title);
     target.append(slide);
   });
