@@ -1,1 +1,0 @@
-{"version":3,"sources":["slow/slow.scss"],"names":[],"mappings":"AACA,eACE,iCAAkC","file":"slow.7025ad2e.css","sourceRoot":"../examples","sourcesContent":["\n.slow .k-slide {\n  transition: opacity 1s ease-in-out;\n}"]}

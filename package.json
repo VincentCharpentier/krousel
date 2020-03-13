@@ -9,7 +9,7 @@
     "build": "microbundle --name Krousel",
     "watch": "microbundle watch --name Krousel",
     "watch:examples": "parcel ./examples/index.html --out-dir public --open",
-    "build:examples": "parcel build ./examples/index.html --out-dir docs",
+    "build:examples": "parcel build ./examples/index.html --out-dir docs --public-url ./",
     "serve:examples": "http-server docs -p 8082",
     "prettier": "prettier --write src/*"
   },
