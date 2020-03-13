@@ -2,6 +2,8 @@
 
 Carousel library with vanilla Javascript
 
+[Check the demo here](https://vincentcharpentier.github.io/krousel/)
+
 Disclaimer: This library is inspired by [Slick](https://github.com/kenwheeler/slick) which is a jQuery plugin. The goal is to provide a similar utility without the jQuery dependency. The API here is almost the same as slick's one. 
 
 ## Features
