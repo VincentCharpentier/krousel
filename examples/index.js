@@ -121,8 +121,11 @@ const CONFIGS = [
 window.addEventListener('load', function() {
   CONFIGS.map(makeKrousel);
   let section = document.getElementById('hoverEffect');
-  new Krousel(section.querySelector('.slider'), {
+  let slider = section.querySelector('.slider');
+  new Krousel(slider, {
     slidesToShow: 3,
+    appendArrows: slider,
+    appendDots: section,
   });
 
   // do krousel with custom inserts

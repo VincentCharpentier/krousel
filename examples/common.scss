@@ -35,22 +35,26 @@ pre {
 
 .go-prev, .go-next {
   background: initial;
+
   &:before {
     content: ''
   }
 }
 
-.top-zone {
+.top-zone, .lens {
   .k-arrow-left, .k-arrow-right {
     display: inline-block;
     position: absolute;
     cursor: pointer;
     top: 50%;
     transform: translateY(-50%);
+    z-index: 5;
   }
+
   .k-arrow-left {
     left: 0;
   }
+
   .k-arrow-right {
     right: 0;
   }
