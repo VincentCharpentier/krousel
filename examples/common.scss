@@ -32,3 +32,26 @@ pre {
   background: #fff;
   color: #3498db;
 }
+
+.go-prev, .go-next {
+  background: initial;
+  &:before {
+    content: ''
+  }
+}
+
+.top-zone {
+  .k-arrow-left, .k-arrow-right {
+    display: inline-block;
+    position: absolute;
+    cursor: pointer;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .k-arrow-left {
+    left: 0;
+  }
+  .k-arrow-right {
+    right: 0;
+  }
+}
