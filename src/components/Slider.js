@@ -248,21 +248,22 @@ export default class Slider {
   }
 
   _setupArrowsDOM() {
-    const { appendArrows, arrows, nextArrow, prevArrow } = this._options;
+    const {
+      _forceAppendPrevArrow,
+      _forceAppendNextArrow,
+      appendArrows,
+      arrows,
+      nextArrow,
+      prevArrow,
+    } = this._options;
     if (arrows) {
-      this._prevArrow =
-        prevArrow ||
-        htmlUtils.createElement('div', {
-          className: CLASSES.arrowLeft,
-        });
-      this._nextArrow =
-        nextArrow ||
-        htmlUtils.createElement('div', {
-          className: CLASSES.arrowRight,
-        });
-      let insertTarget = appendArrows || this._target;
-      // append prevArrow only if it was not already connected to DOM
-      if (!this._prevArrow.isConnected) {
+      this._prevArrow = prevArrow || htmlUtils.createElement('div');
+      this._prevArrow.classList.add(CLASSES.arrowLeft);
+      this._nextArrow = nextArrow || htmlUtils.createElement('div');
+      this._nextArrow.classList.add(CLASSES.arrowRight);
+      let insertTarget = appendArrows || this._trackContainer;
+      // append prevArrow if appendArrow is specified or if it was not already connected to DOM
+      if (_forceAppendPrevArrow || !this._prevArrow.isConnected) {
         // append at first position
         if (insertTarget.childElementCount > 0) {
           insertTarget.insertBefore(this._prevArrow, insertTarget.firstChild);
@@ -271,8 +272,8 @@ export default class Slider {
         }
       }
 
-      // append nextArrow only if it was not already connected to DOM
-      if (!this._nextArrow.isConnected) {
+      // append nextArrow if appendArrow is specified or if it was not already connected to DOM
+      if (_forceAppendNextArrow || !this._nextArrow.isConnected) {
         // append at last position
         insertTarget.appendChild(this._nextArrow);
       }

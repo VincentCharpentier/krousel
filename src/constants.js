@@ -35,6 +35,9 @@ export const DEFAULT_OPTIONS = {
   // Change transition type when changing slide
   // NOTE: transition 'fade' disable options slidesToShow and slidesToScroll
   transition: TRANSITION.SLIDE,
+  // INTERNAL: move arrows elements on init
+  _forceAppendPrevArrow: false,
+  _forceAppendNextArrow: false,
 
   // Enable dragging the slider track with touch or mouse
   draggable: true, // TODO

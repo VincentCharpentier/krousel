@@ -9,6 +9,7 @@
   display: inline-block;
   width: 100%;
   overflow: hidden;
+  position: relative;
 }
 
 .k-track {
@@ -60,27 +61,30 @@
   width: var(--slide-width);
 }
 
-.k-arrow-left,
-.k-arrow-right {
-  display: inline-block;
-  position: absolute;
-  z-index: 5;
-  cursor: pointer;
-  top: 50%;
-  transform: translateY(-50%);
+.k-track-container {
+  .k-arrow-left,
+  .k-arrow-right {
+    display: inline-block;
+    position: absolute;
+    z-index: 5;
+    cursor: pointer;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .k-arrow-left {
+    left: 0;
+  }
+
+  .k-arrow-right {
+    right: 0;
+  }
+
+  .k-arrow-disabled {
+    display: none;
+  }
 }
 
-.k-arrow-left {
-  left: 0;
-}
-
-.k-arrow-right {
-  right: 0;
-}
-
-.k-arrow-disabled {
-  display: none;
-}
 
 .k-dots {
   text-align: center;
