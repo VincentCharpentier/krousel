@@ -11,7 +11,8 @@
     "watch:examples": "parcel ./examples/index.html --out-dir public --open",
     "build:examples": "parcel build ./examples/index.html --out-dir docs --public-url ./",
     "serve:examples": "http-server docs -p 8082",
-    "prettier": "prettier --write src/*"
+    "prettier": "prettier --write src/*",
+    "publish": "clean-publish"
   },
   "targets": "> 0.25%, not dead",
   "repository": {
@@ -30,6 +31,7 @@
   },
   "homepage": "https://github.com/VincentCharpentier/krousel#readme",
   "devDependencies": {
+    "clean-publish": "1.1.6",
     "http-server": "0.12.1",
     "husky": "4.2.3",
     "lint-staged": "10.0.7",
