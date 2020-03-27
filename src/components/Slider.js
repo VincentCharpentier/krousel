@@ -153,7 +153,12 @@ export default class Slider {
   }
 
   _computeProps() {
-    const { infinite, slidesToShow, slidesToScroll } = this._options;
+    const {
+      infinite,
+      slidesToShow,
+      slidesToScroll,
+      transition,
+    } = this._options;
     if (!this._initialized) {
       this._slideCount = this._target.childElementCount;
     } else {
@@ -165,7 +170,8 @@ export default class Slider {
     );
     // bound current page to page count
     this._currentPage = Math.min(this._currentPage, this._pageCount - 1);
-    this._clonePerSide = infinite ? 2 * slidesToShow : 0;
+    this._hasClones = infinite && transition === TRANSITION.SLIDE;
+    this._clonePerSide = this._hasClones ? 2 * slidesToShow : 0;
   }
 
   /**
@@ -173,7 +179,7 @@ export default class Slider {
    * @private
    */
   _setupDOM() {
-    const { transition, speed, infinite } = this._options;
+    const { transition, speed } = this._options;
 
     const children = Array.from(this._target.children);
 
@@ -211,7 +217,7 @@ export default class Slider {
       }
     });
 
-    if (infinite) {
+    if (this._hasClones) {
       this._setupInfiniteDOM();
     }
 
@@ -404,8 +410,7 @@ export default class Slider {
         .querySelectorAll(`.${CLASSES.slideClone}`)
         .forEach((e) => e.remove());
 
-      if (infinite) {
-        // setup infinite
+      if (this._hasClones) {
         this._setupInfiniteDOM();
       }
     }
