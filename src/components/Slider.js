@@ -457,7 +457,9 @@ export default class Slider {
     if (dots) {
       const dotItems = this._dots.querySelectorAll(`.${CLASSES.dot}`);
       dotItems.forEach((item) => item.classList.remove(CLASSES.current));
-      dotItems[this._currentPage].classList.add(CLASSES.current);
+      if (dotItems.length > 0) {
+        dotItems[this._currentPage].classList.add(CLASSES.current);
+      }
     }
   }
 
