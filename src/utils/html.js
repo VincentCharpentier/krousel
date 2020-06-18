@@ -2,6 +2,15 @@ const ATTR_MAP = {
   className: 'class',
 };
 
+const Case = {
+  snakeToCamel(str) {
+    return str.replace(/-[A-Z]/gi, (s) => s[1].toUpperCase());
+  },
+  camelToSnake(str) {
+    return str.replace(/[A-Z]/g, (s) => '-' + s.toLowerCase());
+  },
+};
+
 const htmlUtils = {
   append(target, elements) {
     let toAppend = elements;
@@ -31,11 +40,28 @@ const htmlUtils = {
   },
   makeStyle(props) {
     return Object.entries(props)
-      .map(([k, v]) => {
-        const key = k.replace(/[A-Z]/g, (s) => '-' + s.toLowerCase());
-        return `${key}:${v}`;
-      })
+      .map(([k, v]) => `${Case.camelToSnake(k)}:${v}`)
       .join(';');
+  },
+  parseStyle(style) {
+    return Object.fromEntries(
+      style
+        .split(';')
+        .filter((x) => x.length > 0)
+        .map((rule) => rule.split(':').map((x) => x.trim()))
+        .map(([key, v]) => [Case.snakeToCamel(key), v]),
+    );
+  },
+  setElementStyle(element, styleObj) {
+    const currentStyle = this.parseStyle(element.getAttribute('style'));
+    const mergedStyle = { ...currentStyle, ...styleObj };
+    // drop null entries
+    Object.entries(mergedStyle).forEach(([k, v]) => {
+      if (v === null) {
+        delete mergedStyle[k];
+      }
+    });
+    element.setAttribute('style', this.makeStyle(mergedStyle));
   },
 };
 
