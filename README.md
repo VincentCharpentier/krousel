@@ -43,6 +43,7 @@ Option | Type | Default | Description
 `slidesToShow` | `number` | `1` | Number of slide to show at once
 `slidesToScroll` | `number` | `1` | Number of slide to scroll at once
 `speed` | `number` | `300` | transition speed when changing slide
+`swipe` | `boolean` | `true` | Enable or disable drag to change slide
 `transition` | one of: `'slide'`, `'fade'` | `'slide'` | Change transition type when changing slide<br/>NOTE: transition 'fade' disable options `slidesToShow` and `slidesToScroll`    
 
 #### Responsive option example

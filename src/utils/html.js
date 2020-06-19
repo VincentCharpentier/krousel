@@ -63,6 +63,9 @@ const htmlUtils = {
     });
     element.setAttribute('style', this.makeStyle(mergedStyle));
   },
+  getElementTranslateXValue(element) {
+    return new DOMMatrix(getComputedStyle(element).transform).m41;
+  },
 };
 
 export default htmlUtils;

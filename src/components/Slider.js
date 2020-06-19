@@ -99,6 +99,26 @@ function getBreakpointConfig(options) {
   return bpConfig;
 }
 
+/**
+ * compute X position of a touch or mouse event
+ * @param e native event
+ * @return {number}
+ */
+function getEventClientX(e) {
+  let result = 0;
+  if (e.touches) {
+    // touch event
+    if (e.type === 'touchend') {
+      result = e.changedTouches[0].clientX;
+    } else {
+      result = e.touches[0].clientX;
+    }
+  } else {
+    result = e.clientX;
+  }
+  return result;
+}
+
 export default class Slider {
   constructor(target, options) {
     this._setupOptions = mergeOptions(options);
@@ -107,6 +127,7 @@ export default class Slider {
     // init props
     this._initialized = false;
     this._currentPage = 0;
+    this._dragInitialOffset = 0;
 
     this._showPrev = this._showPrev.bind(this);
     this._showNext = this._showNext.bind(this);
@@ -120,6 +141,9 @@ export default class Slider {
     this._requestNext = this._requestNext.bind(this);
     this._requestPrev = this._requestPrev.bind(this);
     this._requestGoTo = this._requestGoTo.bind(this);
+    this._startDragging = this._startDragging.bind(this);
+    this._onDragMouseMove = this._onDragMouseMove.bind(this);
+    this._endDragging = this._endDragging.bind(this);
 
     this._computeOptions();
     this._computeProps();
@@ -313,7 +337,7 @@ export default class Slider {
   }
 
   _setupListeners() {
-    const { arrows, dots, autoplay, pauseOnHover } = this._options;
+    const { arrows, dots, autoplay, pauseOnHover, swipe } = this._options;
     window.addEventListener('resize', debounce(this._handleResize, 100));
     if (arrows) {
       this._prevArrow.addEventListener('click', this._requestPrev);
@@ -341,6 +365,90 @@ export default class Slider {
         });
       }
     }
+    if (swipe) {
+      const onStopDrag = (e) => {
+        window.removeEventListener('mousemove', this._onDragMouseMove);
+        window.removeEventListener('touchmove', this._onDragMouseMove);
+        window.removeEventListener('mouseup', onStopDrag);
+        window.removeEventListener('touchend', onStopDrag);
+        this._endDragging(e);
+      };
+      const onStartDrag = (e) => {
+        window.addEventListener('mouseup', onStopDrag);
+        window.addEventListener('touchend', onStopDrag);
+        window.addEventListener('mousemove', this._onDragMouseMove);
+        window.addEventListener('touchmove', this._onDragMouseMove);
+        this._startDragging(e);
+      };
+      this._track.addEventListener('mousedown', onStartDrag);
+      this._track.addEventListener('touchstart', onStartDrag);
+    }
+  }
+
+  _computeSlideIdxFromDragX(x) {
+    const { transition, slidesToShow } = this._options;
+    let result = Math.round(-x / this._slideWidth - this._clonePerSide);
+    if (transition !== TRANSITION.SLIDE) {
+      // fade transition: result is how many slides were swiped
+      // add current slide index
+      result += this._currentPage * slidesToShow;
+    }
+    return result;
+  }
+
+  _computeDragX(e) {
+    const { infinite } = this._options;
+    const clientX = getEventClientX(e);
+    const dX = clientX - this._dragStartX;
+    let finalX = this._dragInitialOffset + dX;
+    if (!infinite) {
+      // limit drag effect in finite slider
+      const minBound = -this._slideWidth * (this._slideCount - 1);
+      finalX = Math.min(Math.max(finalX, minBound), 0);
+    }
+    return finalX;
+  }
+
+  _startDragging(e) {
+    const { transition } = this._options;
+    const isAnimSliding = transition === TRANSITION.SLIDE;
+    this._dragStartX = getEventClientX(e);
+    this._dragInitialOffset = isAnimSliding
+      ? htmlUtils.getElementTranslateXValue(this._track)
+      : 0;
+    this._pauseAutoplay();
+    if (isAnimSliding) {
+      this._disableTransition();
+    }
+  }
+
+  _onDragMouseMove(e) {
+    const { transition } = this._options;
+    const dragX = this._computeDragX(e);
+    if (transition === TRANSITION.SLIDE) {
+      // make track follow input
+      this._track.style.setProperty('--dX', dragX + 'px');
+    }
+    // update slide display according to drag position
+    const currentSlideIdx = this._computeSlideIdxFromDragX(dragX);
+    this._computeSlidesClasses(currentSlideIdx);
+  }
+
+  _endDragging(e) {
+    const { slidesToScroll } = this._options;
+    const dragX = this._computeDragX(e);
+
+    // re-enable transition
+    this._enableTransition();
+
+    // remove css var overwrite
+    this._track.style.removeProperty('--dX');
+
+    // snap to closest page
+    const slideIndex = this._computeSlideIdxFromDragX(dragX);
+    const pageIndex = Math.round(slideIndex / slidesToScroll);
+    this._goToPage(pageIndex);
+    this._resumeAutoplay();
   }
 
   _startAutoplay() {
@@ -398,8 +506,6 @@ export default class Slider {
   }
 
   _processOptionsChange(optionsChanged) {
-    const { infinite } = this._options;
-
     const anyChanged = (props) =>
       props.some((x) => optionsChanged.hasOwnProperty(x));
 
@@ -571,13 +677,16 @@ export default class Slider {
   }
 
   _computeSize() {
-    const { slidesToShow } = this._options;
+    const { slidesToShow, transition } = this._options;
     const cloneCount = 2 * this._clonePerSide;
     const sliderWidth = this._trackContainer.clientWidth;
-    const slideWidth = sliderWidth / slidesToShow;
-    this._setCssVar(CSS_VARS.slideWidth, slideWidth + 'px');
-    this._track.style.width = `${(cloneCount + this._slideCount) * slideWidth +
-      1000}px`;
+    this._slideWidth = sliderWidth / slidesToShow;
+    this._setCssVar(CSS_VARS.slideWidth, this._slideWidth + 'px');
+    if (transition === TRANSITION.SLIDE) {
+      this._track.style.width = `${(cloneCount + this._slideCount) *
+        this._slideWidth +
+        1000}px`;
+    }
   }
 
   _showNext() {

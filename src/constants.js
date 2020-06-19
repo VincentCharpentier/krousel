@@ -32,6 +32,8 @@ export const DEFAULT_OPTIONS = {
   slidesToScroll: 1,
   // transition speed when changing slide
   speed: 300,
+  // Enable swiping with touch or mouse
+  swipe: true,
   // Change transition type when changing slide
   // NOTE: transition 'fade' disable options slidesToShow and slidesToScroll
   transition: TRANSITION.SLIDE,
