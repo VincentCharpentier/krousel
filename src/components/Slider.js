@@ -413,6 +413,7 @@ export default class Slider {
     const { transition } = this._options;
     const isAnimSliding = transition === TRANSITION.SLIDE;
     this._dragStartX = getEventClientX(e);
+    this._dragStartTime = Date.now();
     this._dragInitialOffset = isAnimSliding
       ? htmlUtils.getElementTranslateXValue(this._track)
       : 0;
@@ -435,7 +436,7 @@ export default class Slider {
   }
 
   _endDragging(e) {
-    const { slidesToScroll } = this._options;
+    const { slidesToScroll, slidesToShow } = this._options;
     const dragX = this._computeDragX(e);
 
     // re-enable transition
@@ -446,7 +447,24 @@ export default class Slider {
 
     // snap to closest page
     const slideIndex = this._computeSlideIdxFromDragX(dragX);
-    const pageIndex = Math.round(slideIndex / slidesToScroll);
+    let pageIndex = Math.round(slideIndex / slidesToScroll);
+
+    if (pageIndex === this._currentPage) {
+      // check if gesture was a quick slide
+      const dragTime = Date.now() - this._dragStartTime;
+      const clientX = getEventClientX(e);
+      const deltaX = clientX - this._dragStartX;
+      const amplitude = Math.abs(deltaX);
+      const trackWidth = slidesToShow * this._slideWidth;
+      // quick drag with reasonable amplitude is considered swipe next/prev
+      if (
+        dragTime < 500 &&
+        amplitude > trackWidth * 0.3 &&
+        amplitude < trackWidth
+      ) {
+        pageIndex = this._currentPage - Math.sign(deltaX);
+      }
+    }
     this._goToPage(pageIndex);
     this._resumeAutoplay();
   }
