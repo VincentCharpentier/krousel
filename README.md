@@ -1,3 +1,5 @@
+[![NPM Version](https://img.shields.io/npm/v/krousel.svg?style=flat)](https://www.npmjs.com/package/krousel)
+
 # krousel
 
 Carousel library with vanilla Javascript
