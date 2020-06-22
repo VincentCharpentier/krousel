@@ -119,6 +119,10 @@ function getEventClientX(e) {
   return result;
 }
 
+function cancelEvent(e) {
+  e.preventDefault();
+}
+
 export default class Slider {
   constructor(target, options) {
     this._setupOptions = mergeOptions(options);
@@ -371,6 +375,11 @@ export default class Slider {
         window.removeEventListener('touchmove', this._onDragMouseMove);
         window.removeEventListener('mouseup', onStopDrag);
         window.removeEventListener('touchend', onStopDrag);
+        this._track
+          .querySelectorAll(`.${CLASSES.slide}`)
+          .forEach((element) =>
+            element.removeEventListener('dragstart', cancelEvent),
+          );
         this._endDragging(e);
       };
       const onStartDrag = (e) => {
@@ -378,6 +387,12 @@ export default class Slider {
         window.addEventListener('touchend', onStopDrag);
         window.addEventListener('mousemove', this._onDragMouseMove);
         window.addEventListener('touchmove', this._onDragMouseMove);
+        this._track
+          .querySelectorAll(`.${CLASSES.slide}`)
+          .forEach((element) =>
+            element.addEventListener('dragstart', cancelEvent),
+          );
+
         this._startDragging(e);
       };
       this._track.addEventListener('mousedown', onStartDrag);
