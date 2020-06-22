@@ -148,6 +148,7 @@ export default class Slider {
     this._startDragging = this._startDragging.bind(this);
     this._onDragMouseMove = this._onDragMouseMove.bind(this);
     this._endDragging = this._endDragging.bind(this);
+    this._handleClickOnSlide = this._handleClickOnSlide.bind(this);
 
     this._computeOptions();
     this._computeProps();
@@ -343,6 +344,11 @@ export default class Slider {
   _setupListeners() {
     const { arrows, dots, autoplay, pauseOnHover, swipe } = this._options;
     window.addEventListener('resize', debounce(this._handleResize, 100));
+    this._track.querySelectorAll(`.${CLASSES.slide}`).forEach((element) =>
+      element.addEventListener('click', this._handleClickOnSlide, {
+        capture: true,
+      }),
+    );
     if (arrows) {
       this._prevArrow.addEventListener('click', this._requestPrev);
       this._nextArrow.addEventListener('click', this._requestNext);
@@ -400,6 +406,13 @@ export default class Slider {
     }
   }
 
+  _handleClickOnSlide(e) {
+    if (this._isDragging) {
+      cancelEvent(e);
+      this._isDragging = false;
+    }
+  }
+
   _computeSlideIdxFromDragX(x) {
     const { transition, slidesToShow } = this._options;
     let result = Math.round(-x / this._slideWidth - this._clonePerSide);
@@ -411,11 +424,14 @@ export default class Slider {
     return result;
   }
 
-  _computeDragX(e) {
-    const { infinite } = this._options;
+  _computeDragAmplitude(e) {
     const clientX = getEventClientX(e);
-    const dX = clientX - this._dragStartX;
-    let finalX = this._dragInitialOffset + dX;
+    return clientX - this._dragStartX;
+  }
+
+  _computeDragX(dragAmplitude) {
+    const { infinite } = this._options;
+    let finalX = this._dragInitialOffset + dragAmplitude;
     if (!infinite) {
       // limit drag effect in finite slider
       const minBound = -this._slideWidth * (this._slideCount - 1);
@@ -440,7 +456,12 @@ export default class Slider {
 
   _onDragMouseMove(e) {
     const { transition } = this._options;
-    const dragX = this._computeDragX(e);
+    const amplitude = this._computeDragAmplitude(e);
+    if (!this._isDragging && Math.abs(amplitude) > 50) {
+      // this will disable click on slides until drag is over
+      this._isDragging = true;
+    }
+    const dragX = this._computeDragX(amplitude);
     if (transition === TRANSITION.SLIDE) {
       // make track follow input
       this._track.style.setProperty('--dX', dragX + 'px');
@@ -452,7 +473,12 @@ export default class Slider {
 
   _endDragging(e) {
     const { slidesToScroll, slidesToShow } = this._options;
-    const dragX = this._computeDragX(e);
+    const amplitude = this._computeDragAmplitude(e);
+    const dragX = this._computeDragX(amplitude);
+    // do not immediately update state, we could have a click to cancel after the mouseup event
+    setTimeout(() => {
+      this._isDragging = false;
+    }, 250);
 
     // re-enable transition
     this._enableTransition();
@@ -467,17 +493,15 @@ export default class Slider {
     if (pageIndex === this._currentPage) {
       // check if gesture was a quick slide
       const dragTime = Date.now() - this._dragStartTime;
-      const clientX = getEventClientX(e);
-      const deltaX = clientX - this._dragStartX;
-      const amplitude = Math.abs(deltaX);
+      const absAmplitude = Math.abs(amplitude);
       const trackWidth = slidesToShow * this._slideWidth;
       // quick drag with reasonable amplitude is considered swipe next/prev
       if (
         dragTime < 500 &&
-        amplitude > trackWidth * 0.3 &&
-        amplitude < trackWidth
+        absAmplitude > trackWidth * 0.3 &&
+        absAmplitude < trackWidth
       ) {
-        pageIndex = this._currentPage - Math.sign(deltaX);
+        pageIndex = this._currentPage - Math.sign(amplitude);
       }
     }
     this._goToPage(pageIndex);
