@@ -472,7 +472,7 @@ export default class Slider {
   }
 
   _endDragging(e) {
-    const { slidesToScroll, slidesToShow } = this._options;
+    const { slidesToScroll, slidesToShow, infinite } = this._options;
     const amplitude = this._computeDragAmplitude(e);
     const dragX = this._computeDragX(amplitude);
     // do not immediately update state, we could have a click to cancel after the mouseup event
@@ -503,6 +503,9 @@ export default class Slider {
       ) {
         pageIndex = this._currentPage - Math.sign(amplitude);
       }
+    }
+    if (!infinite) {
+      pageIndex = Math.min(Math.max(0, pageIndex), this._pageCount - 1);
     }
     this._goToPage(pageIndex);
     this._resumeAutoplay();
